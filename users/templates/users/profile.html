@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+
+{% block title %} Profile {% endblock %}
+{% block content %}
+
+    <div>
+        <div>
+            <img src="{{ MEDIA_URL }}{{ profile_user.profile_picture }}" alt="" width="100" height="100">
+        </div>
+        <h1>
+            {{ profile_user.username }}
+        </h1>
+        <p>
+            {% if profile_user.bio %}
+                {{ profile_user.bio }}
+            {% else %}
+                <p> </p>
+            {% endif %}
+        </p>
+        {% if logged_user.username != profile_user.username %}
+            <div>
+                <button type="button" id="button-{{profile_user.id}}" class="follow-button">
+                    {% if is_following %}
+                        Unfollow
+                    {% else %}
+                        Follow
+                    {% endif %}
+                </button>
+            </div>
+        {% endif %}
+        <div>
+            <a href="{% url 'users:following' user_id=profile_user.id %}">Following</a>
+        </div>
+    </div>
+    {% if posts %}
+        {% for post in posts %}
+            <div>
+                <img src="{{ MEDIA_URL }}{{ post.img }}" alt="" width="200" height="200">
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No posts</p>
+    {% endif %}
+{% endblock %}

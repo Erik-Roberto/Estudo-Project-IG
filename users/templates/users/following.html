@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %} Following {% endblock %}
+{% block content %}
+    <div>
+        <div>
+            <img src="{{ MEDIA_URL }}{{ profile_user.profile_picture }}" alt="" width="100" height="100">
+        </div>
+        <h1>
+            {{ profile_user.username }}
+        </h1>
+    </div>
+    {% if following_list %}
+        {% for user, is_following in following_list %}
+            <div>
+                <div>
+                    <img src="{{ MEDIA_URL }}{{ user.profile_picture }}" alt="" width="100" height="100">
+                </div>
+                <button type="button" class="follow-button" name="follow-unfollow" id="button-{{ user.id }}">
+                    {% if is_following %}
+                        Unfollow
+                    {% else %}
+                        Follow
+                    {% endif %}
+                </button>
+                <p>{{ user.username }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>You are not following anyone</p>
+    {% endif %}
+
+{% endblock %}
