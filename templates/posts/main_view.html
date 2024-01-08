@@ -1,0 +1,14 @@
+{% extends 'base.html'%}
+
+{% block content %}
+    <div>
+        <img src="{{ MEDIA_URL }}{{ post.img }}" alt="" width="200" height="200">
+        <div>
+            <p>
+                {{post.description}}
+            </p>
+        </div>
+    </div>
+
+
+{% endblock %}

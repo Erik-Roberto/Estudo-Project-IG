@@ -12,7 +12,8 @@ class PostModel(models.Model):
     img = models.ImageField(upload_to='images/%Y/%d', null=True, blank=True, default=None)
     description = models.TextField(blank=True, null=True)
     date = models.DateTimeField(default=timezone.now)
+    published = models.BooleanField(default=True)
 
 
-
-    
+    def __str__(self):
+        return f'{str(self.user)} - post#{self.id} - {self.date}'

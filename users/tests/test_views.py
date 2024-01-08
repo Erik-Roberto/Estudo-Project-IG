@@ -326,11 +326,14 @@ class TestUserViews(TestCase):
         """
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
-        users = [generate_test_user(
+        users = [
+            generate_test_user(
                 username=f'testuser{i}',
                 email=f'testuser{i}@test.com',
                 password=f'passworduser{i}',
-                ) for i in range(randint(2, 8))]
+                )
+            for i in range(randint(2, 8))
+            ]
         random_user = choice(users)
         following_count = 0
         for user in users:
