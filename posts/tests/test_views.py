@@ -1,9 +1,9 @@
 import json
-from random import choice, randint
 
 
 from django.test import TestCase
 from django.urls import reverse
+
 
 from posts.models import PostModel
 from users.models import CustomUser
@@ -24,7 +24,7 @@ class TestPostViews(TestCase):
         """
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         response = self.client.get(
             reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id})
             )
@@ -40,7 +40,7 @@ class TestPostViews(TestCase):
         response = self.client.get(
             reverse(
                 'posts:main-view',
-                kwargs={'post_id': choice(self.posts).id, 'user_id': self.user.id}
+                kwargs={'post_id': self.posts[0].id, 'user_id': self.user.id}
                 )
         )
         self.assertEqual(response.status_code, 200)
@@ -56,14 +56,15 @@ class TestPostViews(TestCase):
         self.assertRedirects(response, reverse('users:login')+f'?next={url}')
 
     
-    def test_post_view_raises_404_for_wrong_post_id(self):
+    def test_post_view_raises_404_for_invalid_post_id(self):
         """
         Test 404 raise for wrong post id.
         """
+        invalid_id = 15
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         response = self.client.get(
-            reverse('posts:main-view', kwargs={'post_id':randint(10,20), 'user_id':self.user.id})
+            reverse('posts:main-view', kwargs={'post_id': invalid_id, 'user_id':self.user.id})
         )
         self.assertEqual(response.status_code, 404)
 
@@ -72,7 +73,7 @@ class TestPostViews(TestCase):
         """
         Test 404 raise if a unpublished post url are accessed.
         """
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         test_post.published = False
         test_post.save()
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
@@ -92,9 +93,9 @@ class TestPostViews(TestCase):
             email=f'testuser{i}@email.com',
             password=f'passworduser{i}',
         )
-        test_post = choice(self.posts)
-        users = [generate_user(i) for i in range(randint(3,10))]
-        likes_count = len([test_post.likes.add(user) for user in users if choice([True, False])])
+        test_post = self.posts[0]
+        users = [generate_user(i) for i in range(5)]
+        likes_count = len([test_post.likes.add(user) for user in users])
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         response = self.client.get(
@@ -108,13 +109,14 @@ class TestPostViews(TestCase):
         Test if the post view raises a 404 if the url requested contain wrong
         combination of user_id and post_id.
         """
+        invalid_id = 100
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         # Correct post and non-existent user
         response = self.client.get(
             reverse(
                 'posts:main-view',
-                kwargs={'post_id': choice(self.posts).id, 'user_id': randint(10,100)}
+                kwargs={'post_id': self.posts[0].id, 'user_id': invalid_id}
                 )
         )
         self.assertEqual(response.status_code, 404, msg='Post not found.')
@@ -126,7 +128,7 @@ class TestPostViews(TestCase):
         """
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         self.assertEqual(test_post.likes.count(), 0)
         response = self.client.post(
             reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
@@ -147,7 +149,7 @@ class TestPostViews(TestCase):
         """
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         test_post.likes.add(self.user)
         self.assertEqual(test_post.likes.count(), 1)
         response = self.client.post(
@@ -170,7 +172,7 @@ class TestPostViews(TestCase):
         """
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
@@ -189,7 +191,7 @@ class TestPostViews(TestCase):
         """
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
@@ -209,7 +211,7 @@ class TestPostViews(TestCase):
         """
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
@@ -228,7 +230,7 @@ class TestPostViews(TestCase):
         """
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
@@ -248,7 +250,7 @@ class TestPostViews(TestCase):
         """
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
@@ -266,10 +268,10 @@ class TestPostViews(TestCase):
         Test if the post view filter and return all the comments of
         the current post.
         """
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         comments = [
             f.create_test_comment(self.user, test_post, f'Comment#{i}')
-            for i in range(randint(1,5))
+            for i in range(5)
             ]
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
@@ -283,7 +285,7 @@ class TestPostViews(TestCase):
         """
         Test the functionality of comment in a post.
         """
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         self.assertEqual(0, CommentModel.objects.filter(post=test_post).count())
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
@@ -302,12 +304,12 @@ class TestPostViews(TestCase):
         """
         Test the functionality of like a comment.
         """
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         comments = [
             f.create_test_comment(self.user, test_post, f'Comment#{i}')
-            for i in range(randint(1,5))
+            for i in range(5)
             ]
-        test_comment = choice(comments)
+        test_comment = comments[0]
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         self.assertEqual(test_comment.likes.count(), 0)
@@ -327,12 +329,12 @@ class TestPostViews(TestCase):
         """
         Test the functionality of unlike a comment.
         """
-        test_post = choice(self.posts)
+        test_post = self.posts[0]
         comments = [
             f.create_test_comment(self.user, test_post, f'Comment#{i}')
-            for i in range(randint(1,5))
+            for i in range(5)
             ]
-        test_comment = choice(comments)
+        test_comment = comments[0]
         test_comment.likes.add(self.user)
         self.assertEqual(test_comment.likes.count(),1)
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)

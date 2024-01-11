@@ -1,5 +1,4 @@
 import json
-from random import choice, randint, getrandbits
 
 
 from django.test import TestCase
@@ -163,10 +162,10 @@ class TestUserViews(TestCase):
         """
         Test profile view raise a HTTP404 for a invalid user id
         """
-        wrong_id = 100
+        invalid_id = 100
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
-        response = self.client.get(reverse('users:profile', kwargs={'user_id':wrong_id}))
+        response = self.client.get(reverse('users:profile', kwargs={'user_id':invalid_id}))
         self.assertEqual(response.status_code, 404)
 
 
@@ -235,13 +234,13 @@ class TestUserViews(TestCase):
         """
         Test if the profile view raises 404 code for a iexistent user id
         """
-        wrong_id = randint(10,100)
+        invalid_id = 100
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
         response = self.client.post(
-                reverse('users:profile', kwargs={'user_id': wrong_id}),
+                reverse('users:profile', kwargs={'user_id': invalid_id}),
                 data=json.dumps({
-                    'button': f'button-{wrong_id}',
+                    'button': f'button-{invalid_id}',
                     'action': 'follow-unfollow',
                 }),
                 content_type="application/json",
@@ -253,7 +252,7 @@ class TestUserViews(TestCase):
         """
         Test if the profile view query passes all posts to template
         """
-        qtd_posts = randint(1,10)
+        qtd_posts = 5
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
         # Creating dummy posts
@@ -286,10 +285,10 @@ class TestUserViews(TestCase):
         """
         Test following view raise a HTTP404 for a invalid user id
         """
-        wrong_id = randint(10, 100)
+        invalid_id = 100
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
-        response = self.client.get(reverse('users:following', kwargs={'user_id':wrong_id}))
+        response = self.client.get(reverse('users:following', kwargs={'user_id':invalid_id}))
         self.assertEqual(response.status_code, 404)
 
 
@@ -297,7 +296,7 @@ class TestUserViews(TestCase):
         """
         Test following view passes all followers to the template
         """
-        qtd_users = randint(2,8)
+        qtd_users = 5
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
         # Creating dummy users
@@ -325,15 +324,17 @@ class TestUserViews(TestCase):
                 email=f'testuser{i}@test.com',
                 password=f'passworduser{i}',
                 )
-            for i in range(randint(2, 8))
+            for i in range(5)
             ]
-        random_user = choice(users)
         following_count = 0
         for user in users:
-            random_user.following.add(user)
-            if getrandbits(1):
-                self.user.following.add(user)
-                following_count += 1
-        response = self.client.get(reverse('users:following', kwargs={'user_id':random_user.id}))
+            self.user.following.add(user)
+            following_count += 1
+        response = self.client.get(reverse('users:following', kwargs={'user_id':self.user.id}))
         context_count = len([user for user, is_following in response.context['following_list'] if is_following])
         self.assertEqual(following_count, context_count)
+        self.user.following.remove(users[0])
+        response = self.client.get(reverse('users:following', kwargs={'user_id':self.user.id}))
+        context_count = len([user for user, is_following in response.context['following_list'] if is_following])
+        self.assertEqual(following_count-1, context_count)
+        

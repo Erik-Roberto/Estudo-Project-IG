@@ -1,10 +1,10 @@
-
 from django.test import TestCase
+
+
 from posts.models import PostModel
-
-
 from users.models import CustomUser
 from factories import factories as f
+
 
 class TestPostModel(TestCase):
 

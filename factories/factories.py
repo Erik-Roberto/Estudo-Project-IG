@@ -20,7 +20,7 @@ def create_test_user(username=STD_TEST_USERNAME, email=STD_TEST_EMAIL, password=
             CustomUser.objects.filter(email=email).exists()):
         count = CustomUser.objects.all().count()
         username = f'{count}{username}'
-        email = f'{count}{email}'
+        email = f'{username}@email.com'
 
     return CustomUser.objects.create_user(
         username = username,
