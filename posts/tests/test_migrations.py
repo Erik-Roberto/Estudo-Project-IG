@@ -1,41 +1,24 @@
-from PIL import Image
-from io import BytesIO
 
 from django.test import TestCase
 from posts.models import PostModel
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 from users.models import CustomUser
-
-def test_image():
-    data = BytesIO()
-    image = Image.new('RGB', (100, 100))
-    image.save(data, format='png')
-    return SimpleUploadedFile("test.jpg", data.getvalue())
-
+from factories import factories as f
 
 class TestPostModel(TestCase):
 
-    username = 'test_username'
-    email = 'test_username@testemail.com'
-    password = 'pass@123'
-
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            username = self.username,
-            email = self.email,
-            password = self.password,
+        self.user = f.create_test_user(
+            username = f.STD_TEST_USERNAME,
+            email = f.STD_TEST_EMAIL,
+            password = f.STD_TEST_PASSWORD,
         )
-        self.post = PostModel.objects.create(
-            user = self.user,
-            img = test_image(),
-            description = f'Test Post #1',
-            )
+        self.post = f.create_test_post(user=self.user)
 
 
     def test_model_post_exists(self):
-        """Test if the model exists and if has the setup user"""
+        """Test if the model exists and if has the setup post"""
         self.assertEqual(1, PostModel.objects.all().count())
 
 

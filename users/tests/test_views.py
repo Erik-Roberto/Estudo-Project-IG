@@ -8,14 +8,7 @@ from django.urls import reverse
 
 from users.models import CustomUser
 from posts.models import PostModel
-
-
-def generate_test_user(username='test_user2', email='testusername2@testemail.com', password = 'testpassword2'):
-    return CustomUser.objects.create_user(
-        username = username,
-        email = email,
-        password = password
-    )
+from factories.factories import create_test_user
 
 
 class TestUserViews(TestCase):
@@ -26,11 +19,11 @@ class TestUserViews(TestCase):
 
 
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-                username=self.username,
-                email=self.email,
-                password=self.password,
-                )
+        self.user = create_test_user(
+            username=self.username,
+            password=self.password,
+            email=self.email
+            )
 
 
     def test_sign_up_view_fail_invalid_data(self):
@@ -181,7 +174,7 @@ class TestUserViews(TestCase):
         """
         Test the funcionality of follow another user in profile view
         """
-        user2 = generate_test_user()
+        user2 = create_test_user()
         self.assertFalse(self.user.is_following(user2.id))
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
@@ -201,7 +194,7 @@ class TestUserViews(TestCase):
         """
         Test the funcionality of unfollow another user in profile view
         """
-        user2 = generate_test_user()
+        user2 = create_test_user()
         self.assertFalse(self.user.is_following(user2.id))
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
@@ -224,7 +217,7 @@ class TestUserViews(TestCase):
         Test if the profile view raises expected error when the post data
         is missig a tag.
         """
-        user2 = generate_test_user()
+        user2 = create_test_user()
         self.assertFalse(self.user.is_following(user2.id))
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
@@ -309,7 +302,7 @@ class TestUserViews(TestCase):
         self.assertTrue(logged_in)
         # Creating dummy users
         for i in range(qtd_users):
-            user = generate_test_user(
+            user = create_test_user(
                 username=f'testuser{i}',
                 email=f'emailuser{i}@test.com',
                 password=f'passworduser{i}',
@@ -327,7 +320,7 @@ class TestUserViews(TestCase):
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
         users = [
-            generate_test_user(
+            create_test_user(
                 username=f'testuser{i}',
                 email=f'testuser{i}@test.com',
                 password=f'passworduser{i}',

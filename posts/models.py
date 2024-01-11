@@ -7,7 +7,7 @@ from users.models import CustomUser
 
 class PostModel(models.Model):
 
-    user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name='posts', default=None, null=True, blank=True)
+    user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name='posts', default=None, null=False, blank=False)
     likes = models.ManyToManyField(to=CustomUser, related_name='likes', default=None, blank=True)
     img = models.ImageField(upload_to='images/%Y/%d', null=True, blank=True, default=None)
     description = models.TextField(blank=True, null=True)
