@@ -78,7 +78,7 @@ class TestUserViews(TestCase):
         logged_in = self.client.login(username=self.username, password=self.password)
         response = self.client.get(reverse('users:sign_up'), follow=True)
         self.assertTrue(logged_in)
-        self.assertRedirects(response, reverse('users:profile', kwargs={'user_id': self.user.id}))
+        self.assertRedirects(response, reverse('users:profile', kwargs={'username': self.user.username}))
 
 
     def test_login_view_fail_blank_data(self):
@@ -99,7 +99,7 @@ class TestUserViews(TestCase):
             'password': self.password,
         }
         response = self.client.post(reverse('users:login'), data, follow=True)
-        self.assertRedirects(response, reverse('users:profile', kwargs={'user_id': self.user.id}))
+        self.assertRedirects(response, reverse('users:profile', kwargs={'username': self.user.username}))
 
 
     def test_login_view_use_expected_template(self):
@@ -118,7 +118,7 @@ class TestUserViews(TestCase):
         logged_in = self.client.login(username=self.username, password=self.password)
         response = self.client.get(reverse('users:login'), follow=True)
         self.assertTrue(logged_in)
-        self.assertRedirects(response, reverse('users:profile', kwargs={'user_id': self.user.id}))
+        self.assertRedirects(response, reverse('users:profile', kwargs={'username': self.user.username}))
 
 
     def test_logout_view_blocked_for_unauthenticated_user(self):
@@ -143,8 +143,8 @@ class TestUserViews(TestCase):
         """
         Test if the profile view is protect of unauthenticated users
         """
-        response = self.client.get(reverse('users:profile', kwargs={'user_id':self.user.id}), follow=True)
-        self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:profile', kwargs={'user_id':self.user.id})}')
+        response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}), follow=True)
+        self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:profile', kwargs={'username':self.user.username})}')
 
 
     def test_profile_view_use_expected_template(self):
@@ -153,7 +153,7 @@ class TestUserViews(TestCase):
         """
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
-        response = self.client.get(reverse('users:profile', kwargs={'user_id':self.user.id}))
+        response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/profile.html')
 
@@ -162,10 +162,10 @@ class TestUserViews(TestCase):
         """
         Test profile view raise a HTTP404 for a invalid user id
         """
-        invalid_id = 100
+        invalid_username = "ABCD100"
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
-        response = self.client.get(reverse('users:profile', kwargs={'user_id':invalid_id}))
+        response = self.client.get(reverse('users:profile', kwargs={'username':invalid_username}))
         self.assertEqual(response.status_code, 404)
 
 
@@ -178,9 +178,9 @@ class TestUserViews(TestCase):
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
         response = self.client.post(
-            reverse('users:profile', kwargs={'user_id': user2.id}),
+            reverse('users:profile', kwargs={'username': user2.username}),
             data=json.dumps({
-                'button': f'button-{user2.id}',
+                'username': user2.username,
                 'action': 'follow-unfollow',
             }),
             content_type="application/json",
@@ -200,9 +200,9 @@ class TestUserViews(TestCase):
         self.user.following.add(user2)
         self.assertTrue(self.user.is_following(user2.id))
         response = self.client.post(
-            reverse('users:profile', kwargs={'user_id': user2.id}),
+            reverse('users:profile', kwargs={'username': user2.username}),
             data=json.dumps({
-                'button': f'button-{user2.id}',
+                'username': user2.username,
                 'action': 'follow-unfollow',
             }),
             content_type="application/json",
@@ -222,9 +222,9 @@ class TestUserViews(TestCase):
         self.assertTrue(logged_in)
         with self.assertRaises(ValueError):        
             response = self.client.post(
-                reverse('users:profile', kwargs={'user_id': user2.id}),
+                reverse('users:profile', kwargs={'username': user2.username}),
                 data=json.dumps({
-                    'button': f'button-{user2.id}',
+                    'username': user2.username,
                 }),
                 content_type="application/json",
             )
@@ -234,13 +234,13 @@ class TestUserViews(TestCase):
         """
         Test if the profile view raises 404 code for a iexistent user id
         """
-        invalid_id = 100
+        invalid_username = 'ABCD100'
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
         response = self.client.post(
-                reverse('users:profile', kwargs={'user_id': invalid_id}),
+                reverse('users:profile', kwargs={'username': invalid_username}),
                 data=json.dumps({
-                    'button': f'button-{invalid_id}',
+                    'username': invalid_username,
                     'action': 'follow-unfollow',
                 }),
                 content_type="application/json",
@@ -258,7 +258,7 @@ class TestUserViews(TestCase):
         # Creating dummy posts
         for i in range(qtd_posts):
             PostModel.objects.create(user=self.user, description=f'Post#{i}')
-        response = self.client.get(reverse('users:profile', kwargs={'user_id':self.user.id}))
+        response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
         self.assertEqual(qtd_posts, response.context['posts'].count())
 
 
@@ -266,8 +266,8 @@ class TestUserViews(TestCase):
         """
         Test if the following view is protect of unauthenticated users
         """
-        response = self.client.get(reverse('users:following', kwargs={'user_id':self.user.id}), follow=True)
-        self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:following', kwargs={'user_id':self.user.id})}')
+        response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}), follow=True)
+        self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:following', kwargs={'username':self.user.username})}')
 
 
     def test_following_view_use_expected_template(self):
@@ -276,7 +276,7 @@ class TestUserViews(TestCase):
         """
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
-        response = self.client.get(reverse('users:following', kwargs={'user_id':self.user.id}))
+        response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/following.html')
 
@@ -285,10 +285,10 @@ class TestUserViews(TestCase):
         """
         Test following view raise a HTTP404 for a invalid user id
         """
-        invalid_id = 100
+        invalid_username = 'ABCD100'
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
-        response = self.client.get(reverse('users:following', kwargs={'user_id':invalid_id}))
+        response = self.client.get(reverse('users:following', kwargs={'username':invalid_username}))
         self.assertEqual(response.status_code, 404)
 
 
@@ -307,7 +307,7 @@ class TestUserViews(TestCase):
                 password=f'passworduser{i}',
                 )
             self.user.following.add(user)
-        response = self.client.get(reverse('users:following', kwargs={'user_id':self.user.id}))
+        response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
         self.assertEqual(qtd_users, len(response.context['following_list']))
 
 
@@ -330,11 +330,11 @@ class TestUserViews(TestCase):
         for user in users:
             self.user.following.add(user)
             following_count += 1
-        response = self.client.get(reverse('users:following', kwargs={'user_id':self.user.id}))
+        response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
         context_count = len([user for user, is_following in response.context['following_list'] if is_following])
         self.assertEqual(following_count, context_count)
         self.user.following.remove(users[0])
-        response = self.client.get(reverse('users:following', kwargs={'user_id':self.user.id}))
+        response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
         context_count = len([user for user, is_following in response.context['following_list'] if is_following])
         self.assertEqual(following_count-1, context_count)
         

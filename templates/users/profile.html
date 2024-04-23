@@ -20,7 +20,8 @@
         </p>
         {% if logged_user.username != profile_user.username %}
             <div>
-                <button type="button" id="button-{{profile_user.id}}" class="follow-button">
+                <input type="hidden" class="username" value="{{ profile_user.username }}">
+                <button type="button" class="follow-button">
                     {% if is_following %}
                         Unfollow
                     {% else %}
@@ -30,7 +31,7 @@
             </div>
         {% endif %}
         <div>
-            <a href="{% url 'users:following' user_id=profile_user.id %}">Following</a>
+            <a href="{% url 'users:following' username=profile_user.username %}">Following</a>
         </div>
     </div>
     {% if posts %}

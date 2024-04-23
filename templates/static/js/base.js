@@ -16,7 +16,7 @@ function getCookie(name) {
 
 
 function followUnfollow(evt){
-    const buttonId = evt.target.id;
+    const username = evt.target.parentNode.querySelector(".username");
     const csrftoken = getCookie('csrftoken');
     const url = window.location.href;
     const request = new Request(
@@ -26,26 +26,20 @@ function followUnfollow(evt){
     fetch(request, {
         method: 'POST',
         mode: 'same-origin',
-        body: JSON.stringify({button: buttonId, action: 'follow-unfollow'})
+        body: JSON.stringify({username: username.value, action: 'follow-unfollow'})
     }
     )
     .then((response) => {
         return response.json();
     })
     .then((data) => {
-        const buttonId = 'button-' + String(data.id);
+        console.log(data);
         if (data.is_following){
-            setValue(buttonId, 'Unfollow');
+            evt.target.innerHTML = 'Unfollow';
         } else {
-            setValue(buttonId, 'Follow');
+            evt.target.innerHTML = 'Follow';
         }
         })
-}
-
-
-function setValue(id, newValue){
-    const element = document.getElementById(id);
-    element.innerHTML = newValue;
 }
 
 
@@ -58,9 +52,82 @@ function generateFollowButtons(){
     }
 }
 
+function sendLike(postID) {
+    console.log('Like enviado :)');
+    console.log(postID);
+}
+
+function formatLikes(number) {
+    return number;
+}
+
 
 if(window.addEventListener) {
     window.addEventListener('load',generateFollowButtons,false);
 } else {
     window.attachEvent('onload',generateFollowButtons);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const moreButtons = document.querySelectorAll('.more-button > p');
+    for (var i = 0; i < moreButtons.length; i++) {
+        moreButtons[i].addEventListener('click', function() {
+            const postDescription = this.parentNode.parentNode;
+            postDescription.style.maxHeight = 'fit-content';
+            postDescription.querySelector('p').style.height = 'fit-content';
+            this.style.display = 'none';
+
+        });
+    }
+
+    const commentInputs = document.querySelectorAll('.input-comment > textarea');
+    for (var i = 0; i < commentInputs.length; i++) {
+        commentInputs[i].addEventListener('input', function() {
+            this.style.height = '';
+            this.style.height = this.scrollHeight + 'px';
+            
+
+            if (this.value == '') {
+                const bgColor = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--bg-color');
+                this.parentNode.querySelector('div')
+                    .style.color = bgColor;
+            }
+            else {
+                const textColor = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--text-blue');
+                this.parentNode.querySelector('div')
+                    .style.color = textColor;
+            } 
+
+        });
+    }
+    
+    const likeButtons = document.querySelectorAll('.post-like-button');
+    for (var i = 0; i < likeButtons.length; i++) {
+        const likeStatus = likeButtons[i].parentNode.querySelector('.like-status').value;
+        if (likeStatus == 'liked') {
+            this.querySelector('.not-liked').classList.add('hide-icon');
+            this.querySelector('span').classList.remove('hide-icon');
+        }
+        likeButtons[i].addEventListener('click', function() {
+            var likes = this.parentNode.parentNode.querySelector('.likes-qty');
+            // sendLike(this.querySelector('.post-id').value);
+            if (this.querySelector('.like-status').value == 'liked') {
+                this.querySelector('.not-liked').classList.remove('hide-icon');
+                this.querySelector('span').classList.add('hide-icon');
+                this.querySelector('.like-status').value = 'not-liked';
+                likes.innerHTML = formatLikes(parseInt(likes.innerHTML) - 1);
+                
+            }
+            else {
+                this.querySelector('.not-liked').classList.add('hide-icon');
+                this.querySelector('span').classList.remove('hide-icon');   
+                this.querySelector('.like-status').value = 'liked';
+                likes.innerHTML = formatLikes(parseInt(likes.innerHTML) + 1);
+            }
+            sendLike(this.querySelector('.post-id').value)
+        });
+    }
+
+})

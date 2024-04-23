@@ -15,7 +15,7 @@ from .models import CustomUser
 
 def sign_up(request):
     if request.user.is_authenticated:
-        return redirect(reverse('users:profile', kwargs={'user_id': request.user.id}))
+        return redirect(reverse('users:profile', kwargs={'username': request.user.username}))
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -29,7 +29,7 @@ def sign_up(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect(reverse('users:profile', kwargs={'user_id': request.user.id}))
+        return redirect(reverse('users:profile', kwargs={'username': request.user}))
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -39,7 +39,7 @@ def login_view(request):
             if user:
                 login(request, user)
                 messages.success(request, 'Welcome back.')
-                return redirect(reverse('users:profile', kwargs={'user_id': user.id}))
+                return redirect(reverse('users:profile', kwargs={'username': username}))
             else:
                 messages.error(request, 'Invalid username or password')
                 return render(request, 'users/login.html',{'form': form})
@@ -55,10 +55,10 @@ def logout_view(request):
 
 
 @login_required
-def profile(request, user_id):
+def profile(request, username):
     if request.method == 'POST':
-        return follow_or_unfollow_user(request, user_id)
-    page_user = get_object_or_404(CustomUser, id=user_id)
+        return follow_or_unfollow_user(request, username)
+    page_user = get_object_or_404(CustomUser, username=username)
     logged_user = get_object_or_404(CustomUser, username=request.user)
     posts = page_user.posts.all()
     return render(request, 'users/profile.html',
@@ -71,10 +71,10 @@ def profile(request, user_id):
     
 
 @login_required
-def following(request, user_id):
+def following(request, username):
     if request.method == 'POST':
         return follow_or_unfollow_user(request)
-    page_user =  get_object_or_404(CustomUser, id=user_id)
+    page_user =  get_object_or_404(CustomUser, username=username)
     logged_user = get_object_or_404(CustomUser, username=request.user)
     following_list = [(user, logged_user.is_following(user.id)) for user in page_user.following.all()]
     return render(request, 'users/following.html',
@@ -86,14 +86,14 @@ def following(request, user_id):
 
 
 @login_required
-def follow_or_unfollow_user(request, user_id=None):
+def follow_or_unfollow_user(request, username=None):
     data = json.loads(request.body)
     if not 'follow-unfollow' in data.values():
         raise ValueError("Missing 'follow-unfollow' tag in post request.")
-    if not user_id:
-        user_id = [int(value) for value in data['button'].split('-') if value.isdigit()][0]
+    if not username:
+        username = data['username']
     logged_user = get_object_or_404(CustomUser, username=request.user)
-    target_user = get_object_or_404(CustomUser, id=user_id)
+    target_user = get_object_or_404(CustomUser, username=username)
     if logged_user.following.filter(id=target_user.id).exists():
         # Unfollowing target user
         logged_user.following.remove(target_user)
@@ -101,4 +101,4 @@ def follow_or_unfollow_user(request, user_id=None):
         # Following target user
         logged_user.following.add(target_user)
     logged_user.save()
-    return JsonResponse({'is_following': logged_user.is_following(user_id), 'id': user_id})
+    return JsonResponse({'is_following': logged_user.is_following(target_user.id), 'username': username})

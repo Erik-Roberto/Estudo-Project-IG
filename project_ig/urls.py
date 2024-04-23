@@ -19,11 +19,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from users.views import sign_up, login_view, logout_view
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('home.urls')),
-    path('users/', include('users.urls')),
+    path('', include('users.urls')),
     path('post/', include('posts.urls')),
 ]
 
