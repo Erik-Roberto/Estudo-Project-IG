@@ -4,43 +4,56 @@
 {% block title %} Profile {% endblock %}
 {% block content %}
 
-    <div>
+    <header>
         <div>
-            <img src="{{ MEDIA_URL }}{{ profile_user.profile_picture }}" alt="" width="100" height="100">
-        </div>
-        <h1>
-            {{ profile_user.username }}
-        </h1>
-        <p>
-            {% if profile_user.bio %}
+            <div>
+                <img src="{{ MEDIA_URL }}{{ profile_user.profile_picture }}" alt="" width="100" height="100">
+            </div>
+            <h1>
+                {{ profile_user.username }}
+            </h1>
+            <p>
+                {% if profile_user.bio %}
                 {{ profile_user.bio }}
-            {% else %}
+                {% else %}
                 <p> </p>
-            {% endif %}
-        </p>
-        {% if logged_user.username != profile_user.username %}
+                {% endif %}
+            </p>
+            {% if logged_user.username != profile_user.username %}
             <div>
                 <input type="hidden" class="username" value="{{ profile_user.username }}">
                 <button type="button" class="follow-button">
                     {% if is_following %}
-                        Unfollow
+                    Unfollow
                     {% else %}
-                        Follow
+                    Follow
                     {% endif %}
                 </button>
             </div>
-        {% endif %}
-        <div>
-            <a href="{% url 'users:following' username=profile_user.username %}">Following</a>
-        </div>
-    </div>
-    {% if posts %}
-        {% for post in posts %}
+            {% endif %}
             <div>
-                <img src="{{ MEDIA_URL }}{{ post.img }}" alt="" width="200" height="200">
+                <a href="{% url 'users:following' username=profile_user.username %}">Following</a>
             </div>
-        {% endfor %}
-    {% else %}
-        <p>No posts</p>
-    {% endif %}
+        </div>
+    </header>
+    <main class="profile-main">
+        <div>
+            {% if posts %}
+            <div class="post-grid-div">
+                {% for post in posts %}
+                    <div class="post-div">
+                        <a href="{% url 'posts:main-view' post_id=post.id %}">
+                            <img src="{{ MEDIA_URL }}{{ post.img }}" alt="">
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                <div>
+                    <p>No posts</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
 {% endblock %}

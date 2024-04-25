@@ -26,7 +26,7 @@ class TestPostViews(TestCase):
         self.assertTrue(logged_in)
         test_post = self.posts[0]
         response = self.client.get(
-            reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id})
+            reverse('posts:main-view', kwargs={'post_id':test_post.id})
             )
         self.assertEqual(test_post.id, response.context['post'].id)
 
@@ -40,7 +40,7 @@ class TestPostViews(TestCase):
         response = self.client.get(
             reverse(
                 'posts:main-view',
-                kwargs={'post_id': self.posts[0].id, 'user_id': self.user.id}
+                kwargs={'post_id': self.posts[0].id}
                 )
         )
         self.assertEqual(response.status_code, 200)
@@ -51,7 +51,7 @@ class TestPostViews(TestCase):
         """
         Test if the post view redirects unauthenticated users to login page.
         """
-        url = reverse('posts:main-view', kwargs={'post_id':self.posts[-1].id, 'user_id':self.user.id})
+        url = reverse('posts:main-view', kwargs={'post_id':self.posts[-1].id})
         response = self.client.get(url, follow=True)
         self.assertRedirects(response, reverse('users:login')+f'?next={url}')
 
@@ -64,7 +64,7 @@ class TestPostViews(TestCase):
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         response = self.client.get(
-            reverse('posts:main-view', kwargs={'post_id': invalid_id, 'user_id':self.user.id})
+            reverse('posts:main-view', kwargs={'post_id': invalid_id})
         )
         self.assertEqual(response.status_code, 404)
 
@@ -79,7 +79,7 @@ class TestPostViews(TestCase):
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         response = self.client.get(
-            reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id})
+            reverse('posts:main-view', kwargs={'post_id':test_post.id})
         )
         self.assertEqual(response.status_code, 404)
 
@@ -99,27 +99,9 @@ class TestPostViews(TestCase):
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         response = self.client.get(
-            reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id})
+            reverse('posts:main-view', kwargs={'post_id':test_post.id})
         )
         self.assertEqual(likes_count, response.context['likes'])
-
-
-    def test_post_view_raises_404_incorrect_combination_user_post_url(self):
-        """
-        Test if the post view raises a 404 if the url requested contain wrong
-        combination of user_id and post_id.
-        """
-        invalid_id = 100
-        logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
-        self.assertTrue(logged_in)
-        # Correct post and non-existent user
-        response = self.client.get(
-            reverse(
-                'posts:main-view',
-                kwargs={'post_id': self.posts[0].id, 'user_id': invalid_id}
-                )
-        )
-        self.assertEqual(response.status_code, 404, msg='Post not found.')
 
 
     def test_post_view_like_post(self):
@@ -131,7 +113,7 @@ class TestPostViews(TestCase):
         test_post = self.posts[0]
         self.assertEqual(test_post.likes.count(), 0)
         response = self.client.post(
-            reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+            reverse('posts:main-view', kwargs={'post_id':test_post.id}),
             data=json.dumps({
                 'button': f'button-post-{test_post.id}',
                 'action': 'like-unlike',
@@ -153,7 +135,7 @@ class TestPostViews(TestCase):
         test_post.likes.add(self.user)
         self.assertEqual(test_post.likes.count(), 1)
         response = self.client.post(
-            reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+            reverse('posts:main-view', kwargs={'post_id':test_post.id}),
             data=json.dumps({
                 'button': f'button-post-{test_post.id}',
                 'action': 'like-unlike',
@@ -175,7 +157,7 @@ class TestPostViews(TestCase):
         test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
-                reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+                reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
                     'button': f'button-post-{test_post.id}',
                     'object': 'post',
@@ -194,7 +176,7 @@ class TestPostViews(TestCase):
         test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
-                reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+                reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
                     'button': f'button-post-{test_post.id}',
                     'action': 'invalid key',
@@ -214,7 +196,7 @@ class TestPostViews(TestCase):
         test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
-                reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+                reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
                     'button': f'button-post-{test_post.id}',
                     'action': 'like-unlike',
@@ -233,7 +215,7 @@ class TestPostViews(TestCase):
         test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
-                reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+                reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
                     'button': f'button-post-{test_post.id}',
                     'action': 'like-unlike',
@@ -253,7 +235,7 @@ class TestPostViews(TestCase):
         test_post = self.posts[0]
         with self.assertRaises(ValueError):
             response = self.client.post(
-                reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+                reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
                     'button': f'button-comment-{test_post.id}',
                     'action': 'new-comment',
@@ -276,7 +258,7 @@ class TestPostViews(TestCase):
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         response = self.client.get(
-            reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id})
+            reverse('posts:main-view', kwargs={'post_id':test_post.id})
         )
         self.assertEqual(len(comments), len(response.context['comments']))
 
@@ -290,7 +272,7 @@ class TestPostViews(TestCase):
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         response = self.client.post(
-            reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+            reverse('posts:main-view', kwargs={'post_id':test_post.id}),
             data=json.dumps({
                 'action': 'new-comment',
                 'text': 'Test comment',
@@ -314,7 +296,7 @@ class TestPostViews(TestCase):
         self.assertTrue(logged_in)
         self.assertEqual(test_comment.likes.count(), 0)
         response = self.client.post(
-            reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+            reverse('posts:main-view', kwargs={'post_id':test_post.id}),
             data=json.dumps({
                 'button': f'button-comment-{test_comment.id}',
                 'action': 'like-unlike',
@@ -340,7 +322,7 @@ class TestPostViews(TestCase):
         logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
         self.assertTrue(logged_in)
         response = self.client.post(
-            reverse('posts:main-view', kwargs={'post_id':test_post.id, 'user_id':self.user.id}),
+            reverse('posts:main-view', kwargs={'post_id':test_post.id}),
             data=json.dumps({
                 'button': f'button-comment-{test_comment.id}',
                 'action': 'like-unlike',

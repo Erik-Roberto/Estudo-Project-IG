@@ -8,16 +8,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="static/css/stylesheet.css">
     <!-- Style sheet -->
     <link rel="stylesheet" href="{% static 'css/stylesheet.css'%}">
     <title>{%block title%}{%endblock%}</title>
 </head>
 <body>
 
-    {% if logged_user %}
-        {% include "parciais/_navbar.html" %}
-    {% endif %}
+{% if logged_user %}
+    {% include "parciais/_navbar.html" %}
+{% endif %}
     
     {%block content %} {%endblock%}
     <script src="{% static 'js/base.js' %}"></script>

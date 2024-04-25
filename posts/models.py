@@ -15,12 +15,17 @@ class PostModel(models.Model):
     published = models.BooleanField(default=True)
 
 
-    def get_likes_total(self):
+    def get_likes_total(self) -> int:
         """Return total number of likes of a post"""
         return self.likes.all().count()
     
 
-    def check_if_user_liked(self, user):
+    def get_comments_total(self) -> int:
+        """Return total number of comments of a post"""
+        return self.comment.all().count()
+
+
+    def check_if_user_liked(self, user: CustomUser) -> bool:
         """Check if a given user liked or not the post"""
         return True if self.likes.filter(username=user.username) else False
 

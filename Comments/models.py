@@ -7,7 +7,7 @@ from posts.models import PostModel
 
 class CommentModel(models.Model):
     user = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name='owner', blank=False, null=False)
-    post = models.ForeignKey(to=PostModel, on_delete=models.CASCADE, related_name='post', blank=False, null=False)
+    post = models.ForeignKey(to=PostModel, on_delete=models.CASCADE, related_name='comment', blank=False, null=False)
     text = models.TextField()
     likes = models.ManyToManyField(to=CustomUser, symmetrical=False, related_name='comment_likes', default=None, blank=True)
     fixed = models.BooleanField(default=False)

@@ -53,66 +53,64 @@ function generateFollowButtons(){
 }
 
 function sendLike(postID) {
+    // TODO: implementar envio do like para o servidor
     console.log('Like enviado :)');
     console.log(postID);
 }
 
 function formatLikes(number) {
+    // TODO: implementar formatação
     return number;
 }
 
-
-if(window.addEventListener) {
-    window.addEventListener('load',generateFollowButtons,false);
-} else {
-    window.attachEvent('onload',generateFollowButtons);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
+function postDescriptionButton() {
     const moreButtons = document.querySelectorAll('.more-button > p');
     for (var i = 0; i < moreButtons.length; i++) {
-        moreButtons[i].addEventListener('click', function() {
-            const postDescription = this.parentNode.parentNode;
-            postDescription.style.maxHeight = 'fit-content';
-            postDescription.querySelector('p').style.height = 'fit-content';
-            this.style.display = 'none';
-
-        });
+        var descriptionText = moreButtons[i].parentNode.parentNode.querySelector('p');
+        if (descriptionText.offsetHeight < descriptionText.scrollHeight) {
+            moreButtons[i].addEventListener('click', function() {
+                const postDescription = this.parentNode.parentNode;
+                postDescription.style.maxHeight = 'fit-content';
+                postDescription.querySelector('p').style.height = 'fit-content';
+                this.style.display = 'none';
+            });
+        }
+        else {
+            moreButtons[i].style.display = 'none';
+        }
     }
+}
 
+
+function inputCommentButton() {
     const commentInputs = document.querySelectorAll('.input-comment > textarea');
     for (var i = 0; i < commentInputs.length; i++) {
         commentInputs[i].addEventListener('input', function() {
             this.style.height = '';
             this.style.height = this.scrollHeight + 'px';
             
-
             if (this.value == '') {
-                const bgColor = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--bg-color');
-                this.parentNode.querySelector('div')
-                    .style.color = bgColor;
+                this.parentNode.querySelector('div').classList.add('hide-icon');
             }
             else {
-                const textColor = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--text-blue');
-                this.parentNode.querySelector('div')
-                    .style.color = textColor;
+                this.parentNode.querySelector('div').classList.remove('hide-icon');
             } 
 
         });
     }
-    
+}
+
+
+function postLikeButton() {
     const likeButtons = document.querySelectorAll('.post-like-button');
     for (var i = 0; i < likeButtons.length; i++) {
-        const likeStatus = likeButtons[i].parentNode.querySelector('.like-status').value;
+        const likeStatus = likeButtons[i].querySelector('.like-status').value;
         if (likeStatus == 'liked') {
-            this.querySelector('.not-liked').classList.add('hide-icon');
-            this.querySelector('span').classList.remove('hide-icon');
+            likeButtons[i].querySelector('.not-liked').classList.add('hide-icon');
+            likeButtons[i].querySelector('span').classList.remove('hide-icon');
         }
         likeButtons[i].addEventListener('click', function() {
             var likes = this.parentNode.parentNode.querySelector('.likes-qty');
-            // sendLike(this.querySelector('.post-id').value);
             if (this.querySelector('.like-status').value == 'liked') {
                 this.querySelector('.not-liked').classList.remove('hide-icon');
                 this.querySelector('span').classList.add('hide-icon');
@@ -129,5 +127,20 @@ document.addEventListener('DOMContentLoaded', function() {
             sendLike(this.querySelector('.post-id').value)
         });
     }
+}
 
+
+if(window.addEventListener) {
+    window.addEventListener('load',generateFollowButtons,false);
+} else {
+    window.attachEvent('onload',generateFollowButtons);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    postDescriptionButton();
+    inputCommentButton();
+    postLikeButton();
+
+    
+    
 })

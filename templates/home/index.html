@@ -14,14 +14,14 @@
                                     <p class="pointer-on-hover">{{ post.user.username }}</p>
                                 </div>
                             </a>
-                        <div class="post-img pointer-on-hover">
+                        <div class="post-img">
                             <!-- TODO: Gerar alt dinâmicamente? -->
                             <img src="{{ MEDIA_URL }}{{ post.img }}" alt="Imagem top">
                         </div>
                         <div class="post-info">
                             <div class="post-interactions">
                                 <div class="post-like-button pointer-on-hover">
-                                        <input type="hidden" value="{% if post.liked_by_logged_user %}liked{% else %}not-liked{% endif %}" class="like-status">
+                                    <input type="hidden" value="{% if post.liked_by_logged_user %}liked{% else %}not-liked{% endif %}" class="like-status">
                                     <input type="hidden" value="{{ post.id }}" class="post-id">
                                     <svg aria-label="Curtir" class="not-liked {% if post.liked_by_logged_user %}hide-icon{% endif %}" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24">
                                         <title>Curtir</title>
@@ -45,9 +45,7 @@
                                 <p class="likes-qty">{{ post.total_likes }}</p><p>curtida(s)</p>
                             </div>
                             <div class="post-description">
-                                <p>
-                                    {{ post.description }}
-                                </p>
+                                {{ post.description|linebreaks }}
                                 <div class="more-button">
                                     <p class="pointer-on-hover">... mais</p>
                                 </div>
@@ -55,11 +53,17 @@
                         </div>
                         <div class="post-comments">
                             <div class="show-comments pointer-on-hover">
-                                <p>Ver todos os 10 comentários</p>
+                                {% if post.total_comments > 1 %}
+                                    <p>Ver todos os {{ post.total_comments }} comentários</p>
+                                {% elif post.total_comments == 1 %}
+                                    <p>Ver comentário</p>
+                                {% else %}
+                                    <p>Sem comentários</p>
+                                {% endif %}
                             </div>
                             <div class="input-comment dm-sans-primary-font-light">
                                 <textarea name="comment" placeholder="Adicione um comentário"></textarea>
-                                <div>
+                                <div class="hide-icon">
                                     <p class="pointer-on-hover">Publicar</p>
                                 </div>
                             </div>

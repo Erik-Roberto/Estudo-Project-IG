@@ -1,7 +1,5 @@
-import json
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, Http404
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
@@ -11,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 
 from .forms import CustomUserCreationForm, LoginForm
 from .models import CustomUser
+
+from helpers.users import follow_or_unfollow_user
 
 
 def sign_up(request):
@@ -85,20 +85,3 @@ def following(request, username):
                     })
 
 
-@login_required
-def follow_or_unfollow_user(request, username=None):
-    data = json.loads(request.body)
-    if not 'follow-unfollow' in data.values():
-        raise ValueError("Missing 'follow-unfollow' tag in post request.")
-    if not username:
-        username = data['username']
-    logged_user = get_object_or_404(CustomUser, username=request.user)
-    target_user = get_object_or_404(CustomUser, username=username)
-    if logged_user.following.filter(id=target_user.id).exists():
-        # Unfollowing target user
-        logged_user.following.remove(target_user)
-    else:
-        # Following target user
-        logged_user.following.add(target_user)
-    logged_user.save()
-    return JsonResponse({'is_following': logged_user.is_following(target_user.id), 'username': username})

@@ -1,7 +1,9 @@
 htmlcov/
 venv/
-db.sqlite3
 media/images/2023
 media/images/2024
 media/images/profiles/2023
 media/images/profiles/2024
+db.sqlite3
+.coverage
+index_base.html
