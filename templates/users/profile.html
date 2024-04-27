@@ -3,57 +3,93 @@
 
 {% block title %} Profile {% endblock %}
 {% block content %}
+    <div class="profile-main">
+        <header>
+            <div class="profile-header">
+                <div class="profile-picture-div">
+                    <img class="profile-picture-img" src="{{ MEDIA_URL }}{{ profile_user.profile_picture }}" alt="Profile picture">
+                </div>
+                <div>
 
-    <header>
-        <div>
-            <div>
-                <img src="{{ MEDIA_URL }}{{ profile_user.profile_picture }}" alt="" width="100" height="100">
-            </div>
-            <h1>
-                {{ profile_user.username }}
-            </h1>
-            <p>
-                {% if profile_user.bio %}
-                {{ profile_user.bio }}
-                {% else %}
-                <p> </p>
-                {% endif %}
-            </p>
-            {% if logged_user.username != profile_user.username %}
-            <div>
-                <input type="hidden" class="username" value="{{ profile_user.username }}">
-                <button type="button" class="follow-button">
-                    {% if is_following %}
-                    Unfollow
-                    {% else %}
-                    Follow
-                    {% endif %}
-                </button>
-            </div>
-            {% endif %}
-            <div>
-                <a href="{% url 'users:following' username=profile_user.username %}">Following</a>
-            </div>
-        </div>
-    </header>
-    <main class="profile-main">
-        <div>
-            {% if posts %}
-            <div class="post-grid-div">
-                {% for post in posts %}
-                    <div class="post-div">
-                        <a href="{% url 'posts:main-view' post_id=post.id %}">
-                            <img src="{{ MEDIA_URL }}{{ post.img }}" alt="">
-                        </a>
+                    <div class="profile-options">
+                        <div>
+                            <h2 class="profile-username">
+                                {{ profile_user.username }}
+                            </h2>
+                        </div>
+                        {% if logged_user.username != profile_user.username %}
+                        <div class="profile-header-buttons">
+                            <input type="hidden" class="username" value="{{ profile_user.username }}">
+                            {% if is_following %}
+                                <p class="profile-button follow-button unfollow-button">
+                                    Unfollow
+                                </p>
+                            {% else %}
+                                <p class="profile-button follow-button">
+                                    Follow
+                                </p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="profile-header-buttons">
+                            <a class="profile-button" href="">Settings</a>
+                            <a class="profile-button" href="">Archive</a>
+                        </div>
+                        {% endif %}
                     </div>
-                {% endfor %}
+                    <div class="profile-spacer"></div>
+                    <div>
+                        <ul class="profile-info">
+                            <li>4 Publications</li>
+                            <li><a href="">5 Followers</a></li>
+                            <li><a href="{% url 'users:following' username=profile_user.username %}">5 Following</a></li>
+                        </ul>  
+                    </div>
+                    <div class="profile-bio">
+                        {% if profile_user.bio %}
+                        <p>
+                        {{ profile_user.bio }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            {% else %}
+        </header>
+        <main>
+            <div>
+                {% if posts %}
+                <div class="post-grid-div">
+                    {% for post in posts %}
+                    <a href="{% url 'posts:main-view' post_id=post.id %}" class="post-div">
+                        <div>
+                            <img src="{{ MEDIA_URL }}{{ post.img }}" alt="">
+                        </div>
+                        <div class="post-overlay">
+                            <div class="post-info-overlay">
+                                <svg aria-label="Descurtir" fill="currentColor" height="16" role="img" viewBox="0 0 48 48" width="16">
+                                    <title>Descurtir</title>
+                                    <path d="M34.6 3.1c-4.5 0-7.9 1.8-10.6 5.6-2.7-3.7-6.1-5.5-10.6-5.5C6 3.1 0 9.6 0 17.6c0 7.3 5.4 12 10.6 16.5.6.5 1.3 1.1 1.9 1.7l2.3 2c4.4 3.9 6.6 5.9 7.6 6.5.5.3 1.1.5 1.6.5s1.1-.2 1.6-.5c1-.6 2.8-2.2 7.8-6.8l2-1.8c.7-.6 1.3-1.2 2-1.7C42.7 29.6 48 25 48 17.6c0-8-6-14.5-13.4-14.5z"></path>
+                                </svg>
+                                <p>10</p>
+                            </div>
+                            <div class="post-info-overlay">
+                                <svg aria-label="Comentar" class="x1lliihq x1n2onr6 x5n08af" fill="currentColor" height="16" role="img" viewBox="0 0 24 24" width="16">
+                                    <title>Comentar</title>
+                                    <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="currentColor" stroke="currentColor" stroke-linejoin="round" stroke-width="2"></path>
+                                </svg>
+                                <p>C 15</p>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
                 <div>
                     <p>No posts</p>
                 </div>
-            {% endif %}
-        </div>
-    </main>
-
-{% endblock %}
+                {% endif %}
+            </div>
+        </main>
+    </div>
+    
+    {% endblock %}

@@ -5,11 +5,14 @@
     --text-blue: rgb(0, 140, 255);
     --highlight-color: rgb(80, 80, 80);
     --like-color: rgb(255, 48, 64);
+    --follow-button-blue: #0095F6;
 
     --min-navbar-width: 200px;
+    --reduced-navbar-width: 77px;
     --min-main-width: 500px;
     --font-size: 20px;
     --font-size-sm: 15px;
+    --profile-picture-size: 160px;
 }
 
 .dm-sans-primary-font {
@@ -71,7 +74,7 @@ p {
 .navbar {
     position: fixed;
     height: 100vh;
-    min-width: calc(var(--min-navbar-width) + 2em);
+    min-width: var(--min-navbar-width);
     display: flex;
     flex-direction: column;
     justify-content: left;
@@ -314,10 +317,93 @@ p {
 
 .profile-main {
     --profile-main-width: 70vw;
+    color: var(--text-color);
     position: absolute;
-    top: 100px;
+    top: 0;
     left: calc((100vw - var(--min-navbar-width) - var(--profile-main-width))/2 + var(--min-navbar-width));
     width: var(--profile-main-width);
+    padding-top: 2em;
+}
+
+.profile-header {
+    --profile-header-rows-height: 1.5em;
+    width: 100%;
+    height: 66vh;
+    display: grid;
+    grid-template-columns: 33% 66%;
+}
+
+.profile-options {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    height: fit-content;
+    margin-left: 2em;
+}
+
+.profile-username {
+    width: 100%;
+    height: var(--profile-header-rows-height);
+    font-size: var(--font-size);
+    line-height: var(--profile-header-rows-height);
+    margin: 0;
+}
+
+.profile-header-buttons {
+    margin-left: 1em;
+    display: flex;
+
+}
+
+.profile-button {
+    font-size: var(--font-size);
+    height: var(--profile-header-rows-height);
+    padding: 0 1em;
+    margin: 0 .2em;
+    border-radius: 8px;
+    background-color: var(--highlight-color);
+    line-height: var(--profile-header-rows-height);
+}
+
+.profile-button:hover {
+    cursor: pointer;
+    background-color: rgb(60, 60, 60);
+}
+
+
+.profile-picture-div {
+    display: flex;
+    justify-content: center;
+    height: fit-content;
+}
+
+.profile-picture-img {
+    width: var(--profile-picture-size);
+    height: var(--profile-picture-size);
+    border-radius: 100%;
+}
+
+.profile-info {
+    height: fit-content;
+    width: 100%;
+    display: flex;
+    padding: 0;
+    margin-left: 2em;
+}
+
+.profile-info li {
+    list-style: none;
+    margin-right: 1em;
+    font-size: var(--font-size);
+}
+
+.profile-spacer {
+    height: 1em;
+    width: 100%;
+}
+
+.profile-bio {
+    margin-left: 2em;
 }
 
 .post-grid-div {
@@ -329,24 +415,66 @@ p {
 .post-div {
     display: flex;
     align-items: center;
+    position: relative;
 }
 
-.post-div > a {
+.post-div > div {
     flex-basis: 100%;
     flex-grow: 0;
     flex-shrink: 0;
 }
 
-.post-div > a > img{
+.post-div > div > img{
     width: 100%;
     height: auto;
 }
 
+.post-overlay {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(50, 50, 50, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.post-info-overlay {
+    font-weight: 800;
+    opacity: 0;
+    margin: 0 1em;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}   
+
+.post-info-overlay * {
+    margin: 0 .2em;
+}
+
+.post-overlay:hover {
+    background-color: rgba(50, 50, 50, .5);
+}
+
+.post-overlay:hover .post-info-overlay {
+    opacity: 1;
+}
+
+.follow-button {
+    background-color: var(--follow-button-blue);
+}
+
+.unfollow-button {
+    background-color: var(--highlight-color);
+}
 @media only screen and (max-width: 1100px) {
     .navbar {
         position: fixed;
         height: 100vh;
-        min-width: 3em;
+        width: var(--reduced-navbar-width);
+        min-width: var(--reduced-navbar-width);
         display: flex;
         flex-direction: column;
         justify-content: left;
@@ -372,15 +500,15 @@ p {
     .main {
         position: absolute;
         top: 100px;
-        left: calc((100vw - 3em - var(--min-main-width))/2 + 3em);
+        left: calc((100vw - var(--min-main-width))/2 + .5 * var(--reduced-navbar-width));
         min-width: var(--min-main-width);
     }
 
+    
     .profile-main {
         --profile-main-width: 80vw;
         position: absolute;
-        top: 100px;
-        left: calc((100vw - var(--profile-main-width))/2 + 3em);
+        left: calc((100vw - var(--profile-main-width))/2 + .5 * var(--reduced-navbar-width));
         width: var(--profile-main-width);
     }
 

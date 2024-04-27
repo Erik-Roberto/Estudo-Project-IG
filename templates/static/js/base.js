@@ -23,6 +23,7 @@ function followUnfollow(evt){
         url,
         {headers: {'X-CSRFToken': csrftoken}}
     )
+    evt.preventDefault();
     fetch(request, {
         method: 'POST',
         mode: 'same-origin',
@@ -36,8 +37,10 @@ function followUnfollow(evt){
         console.log(data);
         if (data.is_following){
             evt.target.innerHTML = 'Unfollow';
+            evt.target.classList.add('unfollow-button');
         } else {
             evt.target.innerHTML = 'Follow';
+            evt.target.classList.remove('unfollow-button');
         }
         })
 }
