@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from users.models import CustomUser
 from posts.models import PostModel
+from comments.models import CommentModel
 from factories.factories import create_test_user
 
 
@@ -162,7 +163,7 @@ class TestUserViews(TestCase):
         """
         Test profile view raise a HTTP404 for a invalid user id
         """
-        invalid_username = "ABCD100"
+        invalid_username = 'ABCD100'
         logged_in = self.client.login(username=self.username, password=self.password)
         self.assertTrue(logged_in)
         response = self.client.get(reverse('users:profile', kwargs={'username':invalid_username}))
@@ -183,7 +184,7 @@ class TestUserViews(TestCase):
                 'username': user2.username,
                 'action': 'follow-unfollow',
             }),
-            content_type="application/json",
+            content_type='application/json',
         )
         self.assertTrue(response.json()['is_following'])
         self.assertTrue(self.user.is_following(user2.id))
@@ -205,7 +206,7 @@ class TestUserViews(TestCase):
                 'username': user2.username,
                 'action': 'follow-unfollow',
             }),
-            content_type="application/json",
+            content_type='application/json',
         )
         self.assertFalse(response.json()['is_following'])
         self.assertFalse(self.user.is_following(user2.id))
@@ -226,7 +227,7 @@ class TestUserViews(TestCase):
                 data=json.dumps({
                     'username': user2.username,
                 }),
-                content_type="application/json",
+                content_type='application/json',
             )
 
 
@@ -243,7 +244,7 @@ class TestUserViews(TestCase):
                     'username': invalid_username,
                     'action': 'follow-unfollow',
                 }),
-                content_type="application/json",
+                content_type='application/json',
             )
         self.assertEqual(response.status_code, 404)
 
@@ -261,6 +262,113 @@ class TestUserViews(TestCase):
         response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
         self.assertEqual(qtd_posts, response.context['posts'].count())
 
+    
+    def test_profile_view_show_correct_amount_of_users_being_followed(self):
+        """
+        Test if the correct amount of users that are being followed by page user are
+        shown in profile view infos
+        """
+        qtd_users = 5
+        logged_in = self.client.login(username=self.username, password=self.password)
+        self.assertTrue(logged_in)
+        # Creating dummy users
+        for i in range(qtd_users):
+            user = create_test_user(
+                username=f'testuser{i}',
+                password=f'testuser{i}_password',
+                email=f'testuser{i}@email.com',
+            )
+            self.user.following.add(user)
+        response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
+        self.assertEqual(qtd_users, response.context['following_qty'])
+    
+    
+    def test_profile_view_show_correct_amount_of_followers(self):
+        """
+        Test if the correct amount of followers are shown in profile view infos
+        """
+        qtd_users = 7
+        logged_in = self.client.login(username=self.username, password=self.password)
+        self.assertTrue(logged_in)
+        # Creating dummy users
+        for i in range(qtd_users):
+            user = create_test_user(
+                username=f'testuser{i}',
+                password=f'testuser{i}_password',
+                email=f'testuser{i}@email.com',
+            )
+            user.following.add(self.user)
+        response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
+        self.assertEqual(qtd_users, response.context['followers_qty'])
+    
+    
+    def test_profile_view_show_correct_amount_of_likes_in_posts(self):
+        """
+        Test if the correct amount of likes are shown on each post
+        """
+        qty_users = 4
+        qty_posts = 2
+        logged_in = self.client.login(username=self.username, password=self.password)
+        self.assertTrue(logged_in)
+        # Creating dummy users
+        users = []
+        for i in range(qty_users):
+            users.append(create_test_user(
+                username=f'testuser{i}',
+                password=f'testuser{i}_password',
+                email=f'testuser{i}@email.com',
+            ))
+        # Creating dummy posts
+        for i in range(qty_posts):
+            post = PostModel.objects.create(
+                user=self.user,
+                img='testing',
+                description='desc'
+            )
+            for user in users:
+                post.likes.add(user)
+        response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
+        for i in range(qty_posts):
+            likes = response.context['posts'][i]['likes']
+            self.assertEqual(qty_users, likes)
+
+        
+    def test_profile_view_show_correct_amount_of_comments_in_posts(self):
+        """
+        Test if the correct amount of comments are shown on each post
+        """
+        qty_users = 3
+        qty_posts = 2
+        logged_in = self.client.login(username=self.username, password=self.password)
+        self.assertTrue(logged_in)
+        # Creating dummy users
+        users = []
+        for i in range(qty_users):
+            users.append(create_test_user(
+                username=f'testuser{i}',
+                password=f'testuser{i}_password',
+                email=f'testuser{i}@email.com',
+            ))
+        # Creating dummy posts and comments
+        posts = []
+        for i in range(qty_posts):
+            post = PostModel.objects.create(
+                user=self.user,
+                img='testing',
+                description='desc'
+            )
+            posts.append(post)
+            for user in users:
+                comment = CommentModel.objects.create(
+                    user=user,
+                    post=post,
+                    text=f'Test Comment on {post.id} by {user.username}',
+                )
+        response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
+        for i in range(qty_posts):
+            comments = response.context['posts'][i]['comments']
+            self.assertEqual(qty_users, comments)
+
 
     def test_following_view_blocked_for_unauthenticated_user(self):
         """
@@ -268,7 +376,7 @@ class TestUserViews(TestCase):
         """
         response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}), follow=True)
         self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:following', kwargs={'username':self.user.username})}')
-
+    
 
     def test_following_view_use_expected_template(self):
         """
@@ -278,7 +386,7 @@ class TestUserViews(TestCase):
         self.assertTrue(logged_in)
         response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'users/following.html')
+        self.assertTemplateUsed(response, 'users/following-followers.html')
 
 
     def test_following_view_raise_404_inexistent_user(self):
@@ -308,10 +416,88 @@ class TestUserViews(TestCase):
                 )
             self.user.following.add(user)
         response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
-        self.assertEqual(qtd_users, len(response.context['following_list']))
+        self.assertEqual(qtd_users, len(response.context['user_list']))
 
 
     def test_following_view_list_correctly_wich_user_are_followed(self):
+        """
+        Test if the list of all users of visited profile lists correctly wich user
+        are being followed by logged user.
+        """
+        qtd_users = 5
+        logged_in = self.client.login(username=self.username, password=self.password)
+        self.assertTrue(logged_in)
+        users = [
+            create_test_user(
+                username=f'testuser{i}',
+                email=f'testuser{i}@test.com',
+                password=f'passworduser{i}',
+                )
+            for i in range(qtd_users)
+            ]
+        following_count = 0
+        for user in users:
+            self.user.following.add(user)
+            following_count += 1
+        response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
+        context_count = len([user for user, is_following in response.context['user_list'] if is_following])
+        self.assertEqual(following_count, context_count)
+        self.user.following.remove(users[0])
+        response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
+        context_count = len([user for user, is_following in response.context['user_list'] if is_following])
+        self.assertEqual(following_count-1, context_count)
+        
+
+    def test_followers_view_blocked_for_unauthenticated_user(self):
+        """
+        Test if the followers view is protect of unauthenticated users
+        """
+        response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}), follow=True)
+        self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:followers', kwargs={'username':self.user.username})}')
+
+
+    def test_followers_view_use_expected_template(self):
+        """
+        Test the followers view template
+        """
+        logged_in = self.client.login(username=self.username, password=self.password)
+        self.assertTrue(logged_in)
+        response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'users/following-followers.html')
+
+
+    def test_followers_view_raise_404_inexistent_user(self):
+        """
+        Test followers view raise a HTTP404 for a invalid user id
+        """
+        invalid_username = 'ABCD100'
+        logged_in = self.client.login(username=self.username, password=self.password)
+        self.assertTrue(logged_in)
+        response = self.client.get(reverse('users:followers', kwargs={'username':invalid_username}))
+        self.assertEqual(response.status_code, 404)
+
+
+    def test_followers_view_list_all_followers(self):
+        """
+        Test followers view passes all followers to the template
+        """
+        qtd_users = 5
+        logged_in = self.client.login(username=self.username, password=self.password)
+        self.assertTrue(logged_in)
+        # Creating dummy users
+        for i in range(qtd_users):
+            user = create_test_user(
+                username=f'testuser{i}',
+                email=f'emailuser{i}@test.com',
+                password=f'passworduser{i}',
+                )
+            user.following.add(self.user)
+        response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}))
+        self.assertEqual(qtd_users, len(response.context['user_list']))
+
+
+    def test_followers_view_list_correctly_wich_user_are_followed(self):
         """
         Test if the list of all users of visited profile lists correctly wich user
         are being followed by logged user.
@@ -328,13 +514,13 @@ class TestUserViews(TestCase):
             ]
         following_count = 0
         for user in users:
+            user.following.add(self.user)
             self.user.following.add(user)
             following_count += 1
-        response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
-        context_count = len([user for user, is_following in response.context['following_list'] if is_following])
+        response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}))
+        context_count = len([user for user, is_following in response.context['user_list'] if is_following])
         self.assertEqual(following_count, context_count)
         self.user.following.remove(users[0])
-        response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
-        context_count = len([user for user, is_following in response.context['following_list'] if is_following])
+        response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}))
+        context_count = len([user for user, is_following in response.context['user_list'] if is_following])
         self.assertEqual(following_count-1, context_count)
-        

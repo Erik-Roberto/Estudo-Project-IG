@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} Following {% endblock %}
+{% block title %} {{page_title}} {% endblock %}
 {% block content %}
     <div>
         <div>
@@ -10,8 +10,8 @@
             {{ profile_user.username }}
         </h1>
     </div>
-    {% if following_list %}
-        {% for user, is_following in following_list %}
+    {% if user_list %}
+        {% for user, is_following in user_list %}
             <div>
                 <div>
                     <img src="{{ MEDIA_URL }}{{ user.profile_picture }}" alt="" width="100" height="100">
@@ -28,7 +28,7 @@
             </div>
         {% endfor %}
     {% else %}
-        <p>You are not following anyone</p>
+        <p>Empty</p>
     {% endif %}
 
 {% endblock %}

@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 
 from .forms import CustomUserCreationForm, LoginForm
 from .models import CustomUser
+from posts.models import PostModel
+from comments.models import CommentModel
 
 from helpers.users import follow_or_unfollow_user
 
@@ -60,13 +62,22 @@ def profile(request, username):
         return follow_or_unfollow_user(request, username)
     page_user = get_object_or_404(CustomUser, username=username)
     logged_user = get_object_or_404(CustomUser, username=request.user)
-    posts = page_user.posts.all()
+    posts = page_user.posts.all().values()
+    for post_dict in posts:
+        post_obj = PostModel.objects.get(id=post_dict['id'])
+        post_dict.update(
+            {
+                'likes': post_obj.likes.all().count(),
+                'comments': CommentModel.objects.filter(post=post_obj).count(),
+            })
     return render(request, 'users/profile.html',
                    {
-                        'profile_user':page_user,
-                        'posts':posts,
-                        'logged_user':logged_user,
-                        'is_following':logged_user.is_following(page_user.id),
+                        'profile_user': page_user,
+                        'posts': posts,
+                        'logged_user': logged_user,
+                        'is_following': logged_user.is_following(page_user.id),
+                        'following_qty': page_user.following.all().count(),
+                        'followers_qty': CustomUser.objects.filter(following=page_user).count()
                     })
     
 
@@ -77,11 +88,28 @@ def following(request, username):
     page_user =  get_object_or_404(CustomUser, username=username)
     logged_user = get_object_or_404(CustomUser, username=request.user)
     following_list = [(user, logged_user.is_following(user.id)) for user in page_user.following.all()]
-    return render(request, 'users/following.html',
+    return render(request, 'users/following-followers.html',
                    {
-                        'profile_user':page_user,
-                        'following_list':following_list,
-                        'logged_user':CustomUser.objects.get(username=request.user)
+                        'profile_user': page_user,
+                        'user_list': following_list,
+                        'logged_user': CustomUser.objects.get(username=request.user),
+                        'page_title': 'Following',
                     })
 
 
+@login_required
+def followers(request, username):
+    if request.method == 'POST':
+        return 'sorry'
+    
+    page_user =  get_object_or_404(CustomUser, username=username)
+    logged_user = get_object_or_404(CustomUser, username=request.user)
+    followers_list = [(user, logged_user.is_following(user.id))
+                       for user in CustomUser.objects.filter(following=logged_user)]
+    return render(request, 'users/following-followers.html',
+                   {
+                        'profile_user': page_user,
+                        'user_list': followers_list,
+                        'logged_user': CustomUser.objects.get(username=request.user),
+                        'page_title': 'Followers',
+                    })
