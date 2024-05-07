@@ -191,7 +191,7 @@ p {
     color: var(--highlight-color);
 }
 
-.post-likes {
+.info-data {
     color: var(--text-color);
     font-size: var(--font-size-sm);
     height: 1em;
@@ -199,7 +199,7 @@ p {
     display: flex;
     justify-content: left;
     align-items: center;
-    margin: 0;
+    margin: .3em 0;
 }
 
 .likes-qty {
@@ -219,8 +219,8 @@ p {
 }
 
 .post-like-button > span {
-    height: 24px;
-    width: 24px;
+    height: fit-content;
+    width: fit-content;
     color: var(--like-color);
 }
 
@@ -274,14 +274,16 @@ p {
 
 .input-comment {
     position: relative;
+    min-height: 3em;
     height: 100%;
     display: flex;
+    justify-content: center;
     flex-direction: column;
 }
 
 .input-comment > textarea {
     width: 100%;
-    height: fit-content;
+    height: 1.5em;
     min-height: 1em;
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -469,6 +471,135 @@ p {
 .unfollow-button {
     background-color: var(--highlight-color);
 }
+
+.background-cover {
+    background-color: rgba(0, 0, 0, .5);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.post-close-button {
+    --size: 20px;
+    display: inline-block;
+    content: "\00d7";
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: var(--size);
+    width: var(--size);
+    font-size: var(--size);
+    color: var(--text-color);
+    margin: 10px;
+}
+
+
+.post-main-view-card {
+    --info-div-width: 405px;
+    --main-card-width: calc(var(--info-div-width) + 200px);
+    --main-card-height: 90vh;
+    position: relative;
+    min-width: var(--main-card-width);
+    width: fit-content;
+    max-width: 80vw;
+    height: var(--main-card-height);
+    display: grid;
+    grid-template-columns: auto var(--info-div-width);
+    background-color: var(--bg-color);
+}
+
+
+.post-main-view-img {
+    width: fit-content;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.post-main-view-img img {
+    width: 100%;
+    height: auto;
+}
+
+.post-main-view-info{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    box-sizing: border-box;
+    border-left: 1px solid var(--highlight-color);
+}
+
+.post-main-view-info-comments {
+    padding: 0 .5em 0 1em;
+}
+
+.post-main-view-info-interactions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.white-bottom-top {
+    border-top: 1px solid var(--highlight-color);
+}
+
+.px-1em {
+    padding: 0 1em;
+}
+
+.secondary-text {
+    color: var(--highlight-color);
+    font-size: 14px;
+}
+
+.comment {
+    height: fit-content;
+    width: 100%;
+    display: flex;
+    justify-content: left;
+    color: var(--text-color);
+}
+
+.comment-img {
+    margin-top: calc(var(--font-size-sm) - 5px);
+}
+
+.comment-text {
+    color: var(--text-color);
+    width: 100%;
+    max-width: var(--min-main-width);
+    height: fit-content;
+    overflow: hidden;
+    text-wrap: wrap;
+    text-align: justify;
+    margin-top: var(--font-size-sm);
+    position: relative;
+    word-wrap: break-word;
+}
+
+.comment-text > div > p {
+    line-height: 1em;
+}
+
+.comment-footer p {
+    margin-right: 1.5em;
+}
+
+.comment-footer .likes-qty {
+    margin-right: .2em;
+}
+
+.comment .post-like-button {
+    margin-left: .5em;
+}
+
 @media only screen and (max-width: 1100px) {
     .navbar {
         position: fixed;

@@ -104,7 +104,7 @@ function inputCommentButton() {
 }
 
 
-function postLikeButton() {
+function likeButton() {
     const likeButtons = document.querySelectorAll('.post-like-button');
     for (var i = 0; i < likeButtons.length; i++) {
         const likeStatus = likeButtons[i].querySelector('.like-status').value;
@@ -127,7 +127,7 @@ function postLikeButton() {
                 this.querySelector('.like-status').value = 'liked';
                 likes.innerHTML = formatLikes(parseInt(likes.innerHTML) + 1);
             }
-            sendLike(this.querySelector('.post-id').value)
+            sendLike(this.querySelector('.obj-id').value)
         });
     }
 }
@@ -142,7 +142,7 @@ if(window.addEventListener) {
 document.addEventListener('DOMContentLoaded', function() {
     postDescriptionButton();
     inputCommentButton();
-    postLikeButton();
+    likeButton();
 
     
     

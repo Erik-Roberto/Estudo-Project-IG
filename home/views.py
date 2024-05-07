@@ -11,7 +11,7 @@ from users.models import CustomUser
 @login_required
 def home(request):
     if request.method == 'POST':
-        return HttpResponse('Sorry. :(')
+        return HttpResponse('Sorry. :(') # TODO: Implementar post
     logged_user = get_object_or_404(CustomUser, username=request.user)
     following_users = logged_user.following.all()
     posts = PostModel.objects.filter(user__in=following_users).values()
