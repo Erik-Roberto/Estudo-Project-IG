@@ -13,22 +13,7 @@ class PostModel(models.Model):
     description = models.TextField(blank=True, null=True)
     date = models.DateTimeField(default=timezone.now)
     published = models.BooleanField(default=True)
-
-
-    def get_likes_total(self) -> int:
-        """Return total number of likes of a post"""
-        return self.likes.all().count()
     
-
-    def get_comments_total(self) -> int:
-        """Return total number of comments of a post"""
-        return self.comment.all().count()
-
-
-    def check_if_user_liked(self, user: CustomUser) -> bool:
-        """Check if a given user liked or not the post"""
-        return True if self.likes.filter(username=user.username) else False
-
 
     def __str__(self):
         return f'{str(self.user)} - post#{self.id} - {self.date}'

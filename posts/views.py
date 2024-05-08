@@ -14,7 +14,6 @@ from helpers.posts import like_unlike, create_new_coment
 @login_required
 def main_view(request, post_id):
     post = get_object_or_404(PostModel, id=post_id)
-    logged_user = get_object_or_404(CustomUser, username=request.user)
     if not post.published:
         raise Http404('Post not found.')
     if request.method == 'POST':
@@ -22,24 +21,17 @@ def main_view(request, post_id):
         if 'action' not in data.keys():
             raise ValueError("Missing action tag in post request.")
         if data['action'] == 'like-unlike':
-            return like_unlike(request, post, data)
+            return JsonResponse(like_unlike(request, post, data))
         elif data['action'] == 'new-comment':
-            return create_new_coment(request, post, data)
+            return JsonResponse(create_new_coment(request, post, data))
         else:
             raise ValueError("Invalid 'action' tag in post request.")
         
-    comments = CommentModel.objects.filter(post=post).order_by('post_date').values()
-    for comment in comments:
-        current_comment = CommentModel.objects.get(id=comment['id'])
-        comment['user'] = CustomUser.objects.get(id=comment['user_id'])
-        comment['liked_by_logged_user'] = current_comment.check_if_user_liked(logged_user)
-        comment['total_likes'] = current_comment.get_likes_total()
-
     context = {
         'logged_user': get_object_or_404(CustomUser, username=request.user),
         'post': post,
         'likes': post.likes.count(),
-        'comments': comments,
+        'comments': CommentModel.objects.filter(post=post).order_by('post_date'),
     }
 
     return render(request, 'posts/main_view.html', context=context)
