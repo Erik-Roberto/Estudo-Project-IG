@@ -474,9 +474,10 @@ p {
 
 .background-cover {
     background-color: rgba(0, 0, 0, .5);
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
+    z-index: 1000;
     width: 100vw;
     height: 100vh;
     display: flex;
@@ -490,8 +491,8 @@ p {
     display: inline-block;
     content: "\00d7";
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 10px;
+    right: 20px;
     height: var(--size);
     width: var(--size);
     font-size: var(--size);
@@ -512,6 +513,7 @@ p {
     display: grid;
     grid-template-columns: auto var(--info-div-width);
     background-color: var(--bg-color);
+    z-index: 100;
 }
 
 
@@ -598,6 +600,11 @@ p {
 
 .comment .post-like-button {
     margin-left: .5em;
+}
+
+.stop-scrolling {
+    height: 100%;
+    overflow: hidden;
 }
 
 @media only screen and (max-width: 1100px) {

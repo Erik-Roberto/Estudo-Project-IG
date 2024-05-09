@@ -62,6 +62,7 @@
                     {% for post in posts %}
                     <a href="{% url 'posts:main-view' post_id=post.id %}" class="post-div">
                         <div>
+                            <!-- TODO: Alt da imagem do post -->
                             <img src="{{ MEDIA_URL }}{{ post.img }}" alt="">
                         </div>
                         <div class="post-overlay">

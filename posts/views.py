@@ -9,13 +9,14 @@ from .models import PostModel
 from users.models import CustomUser
 from comments.models import CommentModel
 
-from helpers.posts import like_unlike, create_new_coment
+from helpers.posts import like_unlike, create_new_coment, is_ajax
 
 @login_required
 def main_view(request, post_id):
     post = get_object_or_404(PostModel, id=post_id)
     if not post.published:
         raise Http404('Post not found.')
+    
     if request.method == 'POST':
         data = json.loads(request.body)
         if 'action' not in data.keys():
@@ -33,7 +34,7 @@ def main_view(request, post_id):
         'likes': post.likes.count(),
         'comments': CommentModel.objects.filter(post=post).order_by('post_date'),
     }
-
-    return render(request, 'posts/main_view.html', context=context)
+    template = 'posts/post_view.html' if is_ajax(request) else 'posts/main_view.html'
+    return render(request, template, context=context)
 
 

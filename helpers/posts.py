@@ -1,3 +1,4 @@
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 
 from comments.models import CommentModel
@@ -5,7 +6,7 @@ from posts.models import PostModel
 from users.models import CustomUser
 
 
-def like_unlike(request, post, data) -> dict:
+def like_unlike(request: HttpRequest, post: PostModel, data: dict) -> dict:
     if 'object' not in data.keys():
         raise ValueError("Missing 'object' tag in post request.")
     if data['object'] == 'post':
@@ -25,7 +26,7 @@ def like_unlike(request, post, data) -> dict:
         raise ValueError("Invalid 'object' tag in post request.")
 
 
-def create_new_coment(request, post, data) -> dict:
+def create_new_coment(request: HttpRequest, post: PostModel, data: dict) -> dict:
     if 'text' not in data.keys():
         raise ValueError("Missing 'text' tag in post request.")
     new_comment = CommentModel.objects.create(
@@ -49,3 +50,7 @@ def get_total_comments(obj: PostModel) -> int:
 
 def check_user_like(obj: PostModel | CommentModel, username: str) -> bool:
     return True if obj.likes.filter(username=username) else False
+
+
+def is_ajax(request: HttpRequest) -> bool:
+    return request.headers.get('x-requested-with') == 'XMLHttpRequest'

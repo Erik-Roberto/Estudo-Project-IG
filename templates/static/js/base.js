@@ -46,6 +46,39 @@ function followUnfollow(evt){
 }
 
 
+function postViewRequest(evt) {
+    const postAnchor = evt.target.parentNode;
+    const url = postAnchor.getAttribute('href');
+    evt.preventDefault();
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+    })
+    .then((response) => {
+        return response.text();
+    })
+    .then((html) => {
+        const postDivOverlay = document.body;
+        postDivOverlay.classList.add('stop-scrolling');
+        postDivOverlay.insertAdjacentHTML('beforeend', html);
+        postCloseButton();
+        inputCommentButton();
+        likeButton();
+
+    })
+}
+
+function postViewButton(){
+    const posts = document.querySelectorAll('.post-div');
+
+    for (var i = 0; i < posts.length; i++) {
+        posts[i].addEventListener('click', postViewRequest);
+    }
+}
+
+
 function generateFollowButtons(){
     const buttons = document.querySelectorAll('.follow-button')
     if (buttons){
@@ -54,6 +87,16 @@ function generateFollowButtons(){
         })
     }
 }
+
+function postCloseButton() {
+    const button = document.querySelector('.post-close-button');
+    button.addEventListener('click', function () {
+        const postCard = document.querySelector('.background-cover');
+        postCard.remove();
+        document.body.classList.remove('stop-scrolling');
+    })
+}
+
 
 function sendLike(postID) {
     // TODO: implementar envio do like para o servidor
@@ -143,6 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
     postDescriptionButton();
     inputCommentButton();
     likeButton();
+    postViewButton();
 
     
     
