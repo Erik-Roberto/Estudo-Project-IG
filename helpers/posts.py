@@ -9,19 +9,21 @@ from users.models import CustomUser
 def like_unlike(request: HttpRequest, post: PostModel, data: dict) -> dict:
     if 'object' not in data.keys():
         raise ValueError("Missing 'object' tag in post request.")
+    if 'objID' not in data.keys():
+        raise ValueError("Missing 'objID' tag in post request.")
     if data['object'] == 'post':
         if post.likes.filter(id=request.user.id).exists():
             post.likes.remove(request.user)
         else:
             post.likes.add(request.user)
-        return {'post_id': post.id, 'liked': post.likes.filter(id=request.user.id).exists()}
+        return {'post_id': post.id, 'liked': check_user_like(post, request.user.username), 'qty': get_total_likes(post)}
     elif data['object'] == 'comment':
-        comment = get_object_or_404(CommentModel, id=int(data['button'][15:])) #TODO: Melhorar método de extração do id
+        comment = get_object_or_404(CommentModel, id=int(data['objID']))
         if comment.likes.filter(id=request.user.id).exists():
             comment.likes.remove(request.user)
         else:
             comment.likes.add(request.user)
-        return {'comment_id': comment.id, 'liked': comment.likes.filter(id=request.user.id).exists()}
+        return {'comment_id': comment.id, 'liked': check_user_like(comment, request.user.username), 'qty': get_total_likes(comment)}
     else:
         raise ValueError("Invalid 'object' tag in post request.")
 
@@ -35,9 +37,17 @@ def create_new_coment(request: HttpRequest, post: PostModel, data: dict) -> dict
         text = data['text'],
     )
     new_comment.save()
-    return {
-            'comments': list(CommentModel.objects.filter(post=post).order_by('-fixed', 'post_date').values())
-        }
+    # TODO: Melhorar esse loop - Talvez tenha maneira melhor de adicionar essas informações sem ter que
+    #       pegar obj do comentário dnv 
+    comments = list(CommentModel.objects.filter(post=post).order_by('-fixed', 'post_date').values())
+    for comment in comments:
+            comment_obj = get_object_or_404(CommentModel, id=comment['id'])
+            comment['liked'] = check_user_like(comment_obj, request.user.username)
+            comment['likes_qty'] = get_total_likes(comment_obj)
+            comment['username'] = comment_obj.user.username
+            comment['user_pic'] = comment_obj.user.profile_picture.url
+
+    return {'comments': comments}
 
 
 def get_total_likes(obj: PostModel | CommentModel) -> int:

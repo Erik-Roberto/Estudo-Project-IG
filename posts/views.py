@@ -29,7 +29,7 @@ def main_view(request, post_id):
             raise ValueError("Invalid 'action' tag in post request.")
         
     context = {
-        'logged_user': get_object_or_404(CustomUser, username=request.user),
+        'logged_user': get_object_or_404(CustomUser, username=request.user.username),
         'post': post,
         'likes': post.likes.count(),
         'comments': CommentModel.objects.filter(post=post).order_by('post_date'),

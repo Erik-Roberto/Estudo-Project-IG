@@ -539,6 +539,9 @@ p {
 
 .post-main-view-info-comments {
     padding: 0 .5em 0 1em;
+    overflow-y: scroll;
+    /* TODO: Ajustar altura sem gambiarra */
+    height: 370px; 
 }
 
 .post-main-view-info-interactions {
@@ -605,6 +608,17 @@ p {
 .stop-scrolling {
     height: 100%;
     overflow: hidden;
+}
+
+
+.comment-like-button-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.comment-date {
+    text-transform: lowercase;
 }
 
 @media only screen and (max-width: 1100px) {
