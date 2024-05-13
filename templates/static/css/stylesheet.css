@@ -1,5 +1,6 @@
 :root {
     --bg-color: black;
+    --bg-color-2: rgb(38, 38, 38);
     --border-color: white;
     --text-color: white;
     --text-blue: rgb(0, 140, 255);
@@ -130,10 +131,6 @@ p {
     width: 1.1em;
 }
 
-.icon > img {
-    border-radius: 100%;
-}
-
 .post-header {
     color: var(--text-color);
     width: 100%;
@@ -147,13 +144,13 @@ p {
     text-align: center;
 }
 
-.post-icon {
+.user-icon {
     aspect-ratio: 1 / 1;
     height: fit-content;
     margin-right: .5em;
 }
 
-.post-icon > img {
+.round-icon > img {
     border-radius: 100%;
 }
 
@@ -551,7 +548,7 @@ p {
     right: 0;
 }
 
-.white-bottom-top {
+.white-border-top {
     border-top: 1px solid var(--highlight-color);
 }
 
@@ -619,6 +616,124 @@ p {
 
 .comment-date {
     text-transform: lowercase;
+}
+
+
+.relationship-view-card {
+    --main-card-width: 400px;
+    --main-card-height: 70vh;
+    position: relative;
+    min-width: var(--main-card-width);
+    width: fit-content;
+    max-width: 80vw;
+    height: var(--main-card-height);
+    background-color: var(--bg-color-2);
+    z-index: 100;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.users-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0 1em;
+}
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    height: fit-content;
+    width: 100%;
+    padding: .5em 0;
+}
+
+.user-item p {
+    color: var(--text-color);
+}
+
+.user-item > div {
+    display: flex;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.max-text {
+    width: 20em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
+    max-height: 1em;
+}
+
+.relationship-card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.card-title {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.card-title h2 {
+    margin: .5em 0;
+    color: var(--text-color);
+}
+
+.relationship-card-header .overlay-close-button {
+    position: absolute;
+    top: .8em;
+    right: 1em;
+    color: var(--text-color);
+}
+
+.relationship-card-header input {
+    background-color: var(--bg-color-2);
+    color: var(--text-color);
+    padding: 0 1em;
+    box-sizing: border-box;
+    border: none;
+    width: 100%;
+    height: 100%;
+    line-height: 1.5em;
+}
+
+.relationship-card-header input:focus {
+    outline-width: 0;
+}
+
+.search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: .5em 2.5em;
+    height: 3em;
+    display: flex;
+    align-items: center;
+}
+
+
+.user-item .profile-button {
+    width: fit-content;
+    height: fit-content;
+    color: var(--text-color);
+    align-self: center;
+    text-transform: lowercase;
+    padding: .3em .8em;
+}
+
+.user-item .relationship-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 40%;
 }
 
 @media only screen and (max-width: 1100px) {

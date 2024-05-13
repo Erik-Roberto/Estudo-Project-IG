@@ -34,7 +34,6 @@ function followUnfollow(evt){
         return response.json();
     })
     .then((data) => {
-        console.log(data);
         if (data.is_following){
             evt.target.innerHTML = 'Unfollow';
             evt.target.classList.add('unfollow-button');
@@ -42,7 +41,8 @@ function followUnfollow(evt){
             evt.target.innerHTML = 'Follow';
             evt.target.classList.remove('unfollow-button');
         }
-        })
+        updateFollowersAndFollowing(data);
+    })
 }
 
 
@@ -111,14 +111,30 @@ function sendComment(postID, commentText) {
 }
 
 
-function postViewRequest(evt) {
-    var targetElement = evt.target;
-    while (!targetElement.classList.contains('post-overlay')) {
-        targetElement = targetElement.parentNode;
+function removeFollower(element, username) {
+    const csrftoken = getCookie('csrftoken');
+    const url = window.location.href;
+    const request = new Request(
+        url,
+        {headers: {'X-CSRFToken': csrftoken}}
+    )
+    fetch(request, {
+        method: 'POST',
+        mode: 'same-origin',
+        body: JSON.stringify({username: username.value, action: 'remove-follower'})
     }
-    const postAnchor = targetElement.parentNode;
-    const url = postAnchor.getAttribute('href');
-    evt.preventDefault();
+    )
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        element.remove();
+        updateFollowersAndFollowing(data);
+    })
+}
+
+
+function postViewRequest(url) {
     fetch(url, {
         method: 'GET',
         headers: {
@@ -129,12 +145,32 @@ function postViewRequest(evt) {
         return response.text();
     })
     .then((html) => {
-        const postDivOverlay = document.body;
-        postDivOverlay.classList.add('stop-scrolling');
-        postDivOverlay.insertAdjacentHTML('beforeend', html);
+        document.body.classList.add('stop-scrolling');
+        document.body.insertAdjacentHTML('beforeend', html);
         postCloseButton();
         inputCommentButton();
         likeButton();
+
+    })
+}
+
+
+function relationshipViewRequest(url) {
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+    })
+    .then((response) => {
+        return response.text();
+    })
+    .then((html) => {
+        document.body.classList.add('stop-scrolling');
+        document.body.insertAdjacentHTML('beforeend', html);
+        postCloseButton();
+        createFollowButtons();
+        createRemoveFollowerButton();
 
     })
 }
@@ -144,12 +180,21 @@ function postViewButton(){
     const posts = document.querySelectorAll('.post-div');
 
     for (var i = 0; i < posts.length; i++) {
-        posts[i].addEventListener('click', postViewRequest);
+        posts[i].addEventListener('click', function (evt) {
+            var targetElement = evt.target;
+            while (!targetElement.classList.contains('post-overlay')) {
+                targetElement = targetElement.parentNode;
+            }
+            const postAnchor = targetElement.parentNode;
+            const url = postAnchor.getAttribute('href');
+            evt.preventDefault();
+            return postViewRequest(url);
+        });
     }
 }
 
 
-function generateFollowButtons(){
+function createFollowButtons(){
     const buttons = document.querySelectorAll('.follow-button')
     if (buttons){
         buttons.forEach(function(btn){
@@ -159,8 +204,32 @@ function generateFollowButtons(){
 }
 
 
+function createRelationshipButtons() {
+    const buttons = document.querySelectorAll('.relationship-button');
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].addEventListener('click', function() {
+            const url = this.querySelector('input').value;
+            return relationshipViewRequest(url);
+        })
+    }
+}
+
+
+function createRemoveFollowerButton(){
+    const buttons = document.querySelectorAll('.remove-follower');
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].addEventListener('click', function() {
+            const username = this.parentNode.querySelector('.username');
+            const userElement = this.parentNode.parentNode;
+            return removeFollower(userElement, username);
+        })
+    }
+
+}
+
+
 function postCloseButton() {
-    const button = document.querySelector('.post-close-button');
+    const button = document.querySelector('.overlay-close-button');
     button.addEventListener('click', function () {
         const postCard = document.querySelector('.background-cover');
         postCard.remove();
@@ -189,7 +258,17 @@ function postDescriptionButton() {
 
 
 function inputCommentButton() {
+    const commentButtonIcons = document.querySelectorAll('.post-comment');
     const commentInputs = document.querySelectorAll('.input-comment > textarea');
+
+    
+    for (var i = 0; i < commentButtonIcons.length; i++) {
+        commentButtonIcons[i].addEventListener('click', function (){
+            const commentInput = this.parentNode.parentNode.parentNode.querySelector('.input-comment > textarea');
+            commentInput.focus();
+        })
+    }
+
     for (var i = 0; i < commentInputs.length; i++) {
         commentInputs[i].addEventListener('input', function() {
             this.style.height = '';
@@ -245,6 +324,17 @@ function likeButton() {
 }
 
 
+function showCommentsButtons() {
+    const buttons = document.querySelectorAll('.show-comments');
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].addEventListener('click', function () {
+            const url = this.querySelector('.post-id').value;
+            return postViewRequest(url);
+        })
+    }
+}
+
+
 function createCommentHTML(data) {
     const dateOptions = {day: 'numeric', month: 'long'};
     var template = document.getElementById('comment-template');
@@ -274,10 +364,11 @@ function createCommentHTML(data) {
 }
 
 
-if(window.addEventListener) {
-    window.addEventListener('load',generateFollowButtons,false);
-} else {
-    window.attachEvent('onload',generateFollowButtons);
+function updateFollowersAndFollowing(data) {
+    const followersInfo = document.querySelector('.followers-url ~ p');
+    const followingInfo = document.querySelector('.following-url ~ p');
+    followersInfo.innerHTML = data.followers + ' seguidores';
+    followingInfo.innerHTML = data.following + ' seguindo';
 }
 
 
@@ -286,7 +377,9 @@ document.addEventListener('DOMContentLoaded', function() {
     inputCommentButton();
     likeButton();
     postViewButton();
-
-    
+    showCommentsButtons();
+    createRelationshipButtons();
+    createFollowButtons();
+    createRemoveFollowerButton();
     
 })

@@ -2,7 +2,7 @@
 {% load i18n %}
 
 <div class="background-cover">
-    <div class="post-close-button pointer-on-hover">&#x2715</div>
+    <div class="post-close-button pointer-on-hover overlay-close-button">&#x2715</div>
     <div class="post-main-view-card">
         <div class="post-main-view-img">
             <!--TODO: Gerar alt dinâmicamente -->
@@ -12,17 +12,17 @@
             <div class="post-main-view-info-header px-1em">
                 <a href="{% url 'users:profile' username=post.user.username %}">
                     <div class="post-header">
-                        <div class="post-icon pointer-on-hover">
+                        <div class="user-icon round-icon pointer-on-hover">
                             <img src="{{ MEDIA_URL }}{{ post.user.profile_picture }}" alt="Foto de perfil de {{ post.user.username }}" height="24" width="24">
                         </div>
                         <p class="pointer-on-hover">{{ post.user.username }}</p>
                     </div>
                 </a>
             </div>
-            <div class="post-main-view-info-comments white-bottom-top">
+            <div class="post-main-view-info-comments white-border-top">
                 <div class="comment post-desc">
                     <div class="comment-img">
-                        <div class="post-icon pointer-on-hover">
+                        <div class="user-icon round-icon pointer-on-hover">
                             <img src="{{ MEDIA_URL }}{{ post.user.profile_picture }}" alt="Foto de perfil de {{ post.user.username }}" height="24" width="24">
                         </div>
                     </div>
@@ -47,7 +47,7 @@
 
                 <div class="comment">
                     <div class="comment-img">
-                        <div class="post-icon pointer-on-hover">
+                        <div class="user-icon round-icon pointer-on-hover">
                             <img src="{{ MEDIA_URL }}{{ comment.user.profile_picture }}" alt="Foto de perfil de {{ comment.user.username }}" height="24" width="24">
                         </div>
                     </div>
@@ -88,7 +88,7 @@
                 {% endfor %}
                     
             </div>
-            <div class="post-main-view-info-interactions white-bottom-top">
+            <div class="post-main-view-info-interactions white-border-top">
                 <div class="post-interactions px-1em">
                     <div class="post-like-button pointer-on-hover">
                         <input type="hidden" value="{% if post|check_user_like:logged_user.username %}liked{% else %}not-liked{% endif %}" class="like-status">
@@ -120,7 +120,7 @@
                     <p class="secondary-text comment-date ">{{ post.date | date:"j \d\e F" }}</p>
                     {% endlanguage %}
                 </div>
-                <div class="input-comment dm-sans-primary-font-light white-bottom-top px-1em">
+                <div class="input-comment dm-sans-primary-font-light white-border-top px-1em">
                     <textarea name="comment" placeholder="Adicione um comentário"></textarea>
                     <div class="hide-icon">
                         <p class="pointer-on-hover">Publicar</p>
@@ -133,7 +133,7 @@
 <template id="comment-template">
     <div class="comment">
         <div class="comment-img">
-            <div class="post-icon pointer-on-hover">
+            <div class="user-icon round-icon pointer-on-hover">
                 <img src="" alt="Foto de perfil de " height="24" width="24">
             </div>
         </div>

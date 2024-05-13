@@ -17,7 +17,7 @@ def like_unlike(request: HttpRequest, post: PostModel, data: dict) -> dict:
         else:
             post.likes.add(request.user)
         return {'post_id': post.id, 'liked': check_user_like(post, request.user.username), 'qty': get_total_likes(post)}
-    elif data['object'] == 'comment':
+    elif data['object'] == 'comment':       
         comment = get_object_or_404(CommentModel, id=int(data['objID']))
         if comment.likes.filter(id=request.user.id).exists():
             comment.likes.remove(request.user)

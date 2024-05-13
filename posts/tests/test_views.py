@@ -115,9 +115,9 @@ class TestPostViews(TestCase):
         response = self.client.post(
             reverse('posts:main-view', kwargs={'post_id':test_post.id}),
             data=json.dumps({
-                'button': f'button-post-{test_post.id}',
                 'action': 'like-unlike',
-                'object': 'post'
+                'object': 'post',
+                'objID': test_post.id,
             }),
             content_type="application/json",
         )
@@ -137,9 +137,9 @@ class TestPostViews(TestCase):
         response = self.client.post(
             reverse('posts:main-view', kwargs={'post_id':test_post.id}),
             data=json.dumps({
-                'button': f'button-post-{test_post.id}',
                 'action': 'like-unlike',
-                'object': 'post'
+                'object': 'post',
+                'objID': test_post.id,
             }),
             content_type="application/json",
         )
@@ -159,8 +159,8 @@ class TestPostViews(TestCase):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
-                    'button': f'button-post-{test_post.id}',
                     'object': 'post',
+                    'objID': test_post.id,
                 }),
                 content_type="application/json",
             )
@@ -178,9 +178,9 @@ class TestPostViews(TestCase):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
-                    'button': f'button-post-{test_post.id}',
                     'action': 'invalid key',
                     'object': 'post',
+                    'objID': test_post.id,
                 }),
                 content_type="application/json",
             )
@@ -198,8 +198,8 @@ class TestPostViews(TestCase):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
-                    'button': f'button-post-{test_post.id}',
                     'action': 'like-unlike',
+                    'objID': test_post.id,
                 }),
                 content_type="application/json",
             )
@@ -217,9 +217,54 @@ class TestPostViews(TestCase):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
-                    'button': f'button-post-{test_post.id}',
                     'action': 'like-unlike',
                     'object': 'invalid key',
+                    'objID': test_post.id,
+                }),
+                content_type="application/json",
+            )
+
+
+    def test_post_view_like_unlike_missing_objID_key(self):
+        """
+        Test if the post view raises expected error when the post data
+        is missig the objID key.
+        """
+        logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
+        self.assertTrue(logged_in)
+        test_post = self.posts[0]
+        with self.assertRaises(ValueError):
+            response = self.client.post(
+                reverse('posts:main-view', kwargs={'post_id':test_post.id}),
+                data=json.dumps({
+                    'action': 'like-unlike',
+                    'object': 'post',
+                }),
+                content_type="application/json",
+            )
+
+
+    def test_post_view_invalid_objID_key_raises_error(self):
+        """
+        Test if a invalid objID key in post request raises a
+        Value error.
+        """
+        test_post = self.posts[0]
+        comments = [
+            f.create_test_comment(self.user, test_post, f'Comment#{i}')
+            for i in range(5)
+            ]
+        test_comment = comments[0]
+        logged_in = self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
+        self.assertTrue(logged_in)
+        self.assertEqual(test_comment.likes.count(), 0)
+        with self.assertRaises(ValueError):
+            response = self.client.post(
+                reverse('posts:main-view', kwargs={'post_id':test_post.id}),
+                data=json.dumps({
+                    'action': 'like-unlike',
+                    'object': 'comment',
+                    'objID': 'invalidID',
                 }),
                 content_type="application/json",
             )
@@ -237,9 +282,7 @@ class TestPostViews(TestCase):
             response = self.client.post(
                 reverse('posts:main-view', kwargs={'post_id':test_post.id}),
                 data=json.dumps({
-                    'button': f'button-comment-{test_post.id}',
                     'action': 'new-comment',
-                    'object': 'comment',
                 }),
                 content_type="application/json",
             )
@@ -298,9 +341,9 @@ class TestPostViews(TestCase):
         response = self.client.post(
             reverse('posts:main-view', kwargs={'post_id':test_post.id}),
             data=json.dumps({
-                'button': f'button-comment-{test_comment.id}',
                 'action': 'like-unlike',
                 'object': 'comment',
+                'objID': test_comment.id,
             }),
             content_type="application/json",
         )
@@ -324,9 +367,9 @@ class TestPostViews(TestCase):
         response = self.client.post(
             reverse('posts:main-view', kwargs={'post_id':test_post.id}),
             data=json.dumps({
-                'button': f'button-comment-{test_comment.id}',
                 'action': 'like-unlike',
                 'object': 'comment',
+                'objID': test_comment.id,
             }),
             content_type="application/json",
         )

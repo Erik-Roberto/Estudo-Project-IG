@@ -2,14 +2,13 @@
 {% load custom_tags %}
 
 {%block content %}
-
     <main>
         <div class="main">
                 {% for post in posts %}
                     <div class="post">
                         <a href="{% url 'users:profile' username=post.user.username %}">
                             <div class="post-header">
-                                <div class="post-icon pointer-on-hover">
+                                <div class="user-icon round-icon pointer-on-hover">
                                     <img src="{{ MEDIA_URL }}{{ post.user.profile_picture }}" alt="Foto de perfil do usuário do post" height="24" width="24">
                                 </div>
                                 <p class="pointer-on-hover">{{ post.user.username }}</p>
@@ -55,12 +54,13 @@
                         </div>
                         <div class="post-comments">
                             <div class="show-comments pointer-on-hover">
+                                <input type="hidden" value="{% url 'posts:main-view' post_id=post.id %}" class="post-id">
                                 {% if post|get_total_comments > 1 %}
-                                    <p>Ver todos os {{ post|get_total_comments }} comentários</p>
+                                <p>Ver todos os {{ post|get_total_comments }} comentários</p>
                                 {% elif post|get_total_comments == 1 %}
-                                    <p>Ver comentário</p>
+                                <p>Ver comentário</p>
                                 {% else %}
-                                    <p>Sem comentários</p>
+                                <p>Sem comentários</p>
                                 {% endif %}
                             </div>
                             <div class="input-comment dm-sans-primary-font-light">

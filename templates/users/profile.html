@@ -22,27 +22,33 @@
                             <input type="hidden" class="username" value="{{ profile_user.username }}">
                             {% if is_following %}
                                 <p class="profile-button follow-button unfollow-button">
-                                    Unfollow
+                                    Seguindo
                                 </p>
                             {% else %}
                                 <p class="profile-button follow-button">
-                                    Follow
+                                    Seguir
                                 </p>
                             {% endif %}
                         </div>
                         {% else %}
                         <div class="profile-header-buttons">
-                            <a class="profile-button" href="">Settings</a>
-                            <a class="profile-button" href="">Archive</a>
+                            <a class="profile-button" href="">Configurações</a>
+                            <a class="profile-button" href="">Arquivo</a>
                         </div>
                         {% endif %}
                     </div>
                     <div class="profile-spacer"></div>
                     <div>
                         <ul class="profile-info">
-                            <li>{{ posts|length }} publications</li>
-                            <li><a href="{% url 'users:followers' username=profile_user.username %}">{{ followers_qty }} followers</a></li>
-                            <li><a href="{% url 'users:following' username=profile_user.username %}">{{ following_qty }} following</a></li>
+                            <li>{{ posts|length }} publicações</li>
+                            <li class="relationship-button pointer-on-hover">
+                                <input type="hidden" value="{% url 'users:followers' username=profile_user.username %}" class="followers-url">
+                                <p>{{ followers_qty }} seguidores</p>
+                            </li>
+                            <li class="relationship-button pointer-on-hover">
+                                <input type="hidden" value="{% url 'users:following' username=profile_user.username %}" class="following-url">
+                                <p>{{ following_qty }} seguindo</p>
+                            </li>
                         </ul>  
                     </div>
                     <div class="profile-bio">
@@ -86,7 +92,7 @@
                 </div>
                 {% else %}
                 <div>
-                    <p>No posts</p>
+                    <p>Sem postagens</p>
                 </div>
                 {% endif %}
             </div>

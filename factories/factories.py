@@ -1,6 +1,4 @@
 from PIL import Image
-from io import BytesIO
-
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError
@@ -13,7 +11,8 @@ from comments.models import CommentModel
 STD_TEST_USERNAME = 'test_user'
 STD_TEST_EMAIL = 'testusername@testemail.com'
 STD_TEST_PASSWORD = 'testpassword'
-
+TEST_IMAGE_PATH = 'media/images/tests/'
+TEST_IMAGE_NAME = 'test_image.png'
 
 def create_test_user(username=STD_TEST_USERNAME, email=STD_TEST_EMAIL, password=STD_TEST_PASSWORD):
     if (CustomUser.objects.filter(username=username).exists()  or 
@@ -29,11 +28,13 @@ def create_test_user(username=STD_TEST_USERNAME, email=STD_TEST_EMAIL, password=
     )
 
 
-def create_test_image():
-    data = BytesIO()
-    image = Image.new('RGB', (100, 100))
-    image.save(data, format='png')
-    return SimpleUploadedFile("test.jpg", data.getvalue())
+def get_test_image():
+    try:
+        image = open(TEST_IMAGE_PATH + TEST_IMAGE_NAME, 'rb').read()
+    except FileNotFoundError as err: 
+        print('File not found. Try changing default path or create a new file.')
+        raise err
+    return SimpleUploadedFile(name=TEST_IMAGE_NAME, content=image, content_type='image/png')
 
 
 def create_test_post(user=None, desc='Test Post'):
@@ -41,7 +42,7 @@ def create_test_post(user=None, desc='Test Post'):
         user = create_test_user()
     return PostModel.objects.create(
         user = user,
-        img = create_test_image(),
+        img = get_test_image(),
         description = desc,
         )
 
