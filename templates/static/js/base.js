@@ -15,6 +15,24 @@ function getCookie(name) {
 }
 
 
+function getObjInfo(obj) {
+    const type = obj.querySelector('.type').value;
+    if (type == 'comment') {
+        var postID = obj.parentNode.parentNode.parentNode.parentNode.querySelector('.post-interactions .obj-id').value;
+        var objID = obj.querySelector('.obj-id').value;
+    }
+    else if (type == 'post') {
+        var postID = obj.querySelector('.obj-id').value;
+        var objID = postID;
+    }
+    return {
+        postID: postID,
+        objID: objID,
+        type: type,
+    }
+}
+
+
 function followUnfollow(evt){
     const username = evt.target.parentNode.querySelector(".username");
     const csrftoken = getCookie('csrftoken');
@@ -49,18 +67,9 @@ function followUnfollow(evt){
 function sendLike(obj) {
     const csrftoken = getCookie('csrftoken');
 
-    var postID;
-    const type = obj.querySelector('.type').value;
-    if (type == 'comment') {
-        var postID = obj.parentNode.parentNode.parentNode.parentNode.querySelector('.post-interactions .obj-id').value;
-        var objID = obj.querySelector('.obj-id').value;
-    }
-    else if (type == 'post') {
-        var postID = obj.querySelector('.obj-id').value;
-        var objID = postID;
-    }
+    var ids = getObjInfo(obj);
 
-    const url = '/post/' + postID;
+    const url = '/post/' + ids.postID;
     const request = new Request(
         url,
         {headers: {'X-CSRFToken': csrftoken}}
@@ -69,9 +78,8 @@ function sendLike(obj) {
     fetch(request, {
         method: 'POST',
         mode: 'same-origin',
-        body: JSON.stringify({action: 'like-unlike', object: type, objID: objID})
-    }
-    )
+        body: JSON.stringify({action: 'like-unlike', object: ids.type, objID: ids.objID})
+    })
     .then((response) => {
         return response.json();
     })
@@ -134,6 +142,34 @@ function removeFollower(element, username) {
 }
 
 
+function likesView(obj) {
+    const csrftoken = getCookie('csrftoken');
+
+    var ids = getObjInfo(obj);
+
+    const url = '/post/' + ids.postID + '/likes';
+    const request = new Request(
+        url,
+        {headers: {'X-CSRFToken': csrftoken}}
+    )
+    
+    fetch(request, {
+        method: 'POST',
+        mode: 'same-origin',
+        body: JSON.stringify({object: ids.type, objID: ids.objID})
+    })
+    .then((response) => {
+        return response.text();
+    })
+    .then((html) => {
+        document.body.classList.add('stop-scrolling');
+        document.body.insertAdjacentHTML('beforeend', html);
+        postCloseButton();
+        createFollowButtons();
+    })
+}
+
+
 function postViewRequest(url) {
     fetch(url, {
         method: 'GET',
@@ -150,7 +186,7 @@ function postViewRequest(url) {
         postCloseButton();
         inputCommentButton();
         likeButton();
-
+        createLikesViewButton();
     })
 }
 
@@ -194,6 +230,20 @@ function postViewButton(){
 }
 
 
+function createLikesViewButton() {
+    const buttons = document.querySelectorAll('.info-data');
+    for (var i = 0; i < buttons.length; i++) {
+        if (!buttons[i].hasEventListener) {
+            buttons[i].hasEventListener = true;
+            buttons[i].addEventListener('click', function() {
+                const obj = this.parentNode.parentNode.querySelector('.post-like-button');
+                return likesView(obj);
+            })
+        }
+    }
+}
+
+
 function createFollowButtons(){
     const buttons = document.querySelectorAll('.follow-button')
     if (buttons){
@@ -229,12 +279,26 @@ function createRemoveFollowerButton(){
 
 
 function postCloseButton() {
-    const button = document.querySelector('.overlay-close-button');
-    button.addEventListener('click', function () {
-        const postCard = document.querySelector('.background-cover');
-        postCard.remove();
-        document.body.classList.remove('stop-scrolling');
-    })
+    const bgCoverLayer = document.querySelectorAll('.background-cover');
+    for (var i = 0; i < bgCoverLayer.length; i++) {
+        if (!bgCoverLayer[i].layer) {
+            document.layer += 1;
+            bgCoverLayer[i].layer = document.layer;
+            bgCoverLayer[i].setAttribute('id', 'bgc' + document.layer);
+
+            const button = bgCoverLayer[i].querySelector('.overlay-close-button');
+
+            button.addEventListener('click', function () {
+                document.getElementById('bgc'+ document.layer).remove();
+                document.layer -= 1;
+                if (document.layer == 0) {
+                    document.body.classList.remove('stop-scrolling');
+                }
+            })
+        }
+
+    }
+    
 }
 
 
@@ -381,5 +445,8 @@ document.addEventListener('DOMContentLoaded', function() {
     createRelationshipButtons();
     createFollowButtons();
     createRemoveFollowerButton();
+    createLikesViewButton();
+    
+    document.layer = 0;
     
 })

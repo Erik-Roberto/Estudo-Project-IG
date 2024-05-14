@@ -88,7 +88,7 @@ def following(request, username):
     page_user =  get_object_or_404(CustomUser, username=username)
     logged_user = get_object_or_404(CustomUser, username=request.user)
     following_list = [(user, logged_user.is_following(user.id)) for user in page_user.following.all()]
-    return render(request, 'users/following-followers.html',
+    return render(request, 'users/users_card.html',
                    {
                         'profile_user': page_user,
                         'user_list': following_list,
@@ -106,7 +106,7 @@ def followers(request, username):
     logged_user = get_object_or_404(CustomUser, username=request.user)
     followers_list = [(user, logged_user.is_following(user.id))
                        for user in CustomUser.objects.filter(following=page_user)]
-    return render(request, 'users/following-followers.html',
+    return render(request, 'users/users_card.html',
                    {
                         'profile_user': page_user,
                         'user_list': followers_list,

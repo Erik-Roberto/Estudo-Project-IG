@@ -22,7 +22,7 @@
                             <a href="{% url 'users:profile' username=user.username %}">
                                 <p>{{ user.username }}</p>
                             </a>
-                            {% if profile_user.bio %}
+                            {% if user.bio %}
                             <p class="max-text">{{ user.bio }}</p>
                             {% endif %}
                         </span>

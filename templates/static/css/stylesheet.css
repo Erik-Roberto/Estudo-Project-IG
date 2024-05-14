@@ -524,6 +524,7 @@ p {
 .post-main-view-img img {
     width: 100%;
     height: auto;
+    max-height: var(--main-card-height);
 }
 
 .post-main-view-info{
@@ -733,7 +734,6 @@ p {
 .user-item .relationship-buttons {
     display: flex;
     justify-content: space-between;
-    width: 40%;
 }
 
 @media only screen and (max-width: 1100px) {
