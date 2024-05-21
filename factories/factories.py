@@ -1,11 +1,9 @@
 from PIL import Image
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import IntegrityError
 
 from users.models import CustomUser
-from posts.models import PostModel
-from comments.models import CommentModel
+from posts.models import PostModel, CommentModel
 
 
 STD_TEST_USERNAME = 'test_user'

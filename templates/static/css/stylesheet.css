@@ -67,7 +67,7 @@ p {
 .navbar > ul{
     list-style: none;
     margin: 0;
-    padding: 8px 12px 20px 8px;
+    padding: 8px 12px 20px 12px;
     height: fit-content;
 
 }
@@ -110,14 +110,17 @@ p {
     min-width: var(--min-main-width);
 }
 
+
+.navbar > ul > li {
+    padding-left: .5em;
+    margin: 1em 0;
+}
+
 .navbar > ul > li > a {
     display: flex;
     justify-content: left;
-    padding-left: 15px;
     border-radius: 8px;
-    margin: 1em 0;
     height: 2em;
-
 }
 
 .navbar > ul > li > a:hover {
@@ -125,10 +128,15 @@ p {
 }
 
 .icon {
+    display: flex;
+    justify-content: center;
     align-self: center;
-    margin-right: 1em;
     height: 1.1em;
     width: 1.1em;
+}
+
+.navbar .icon {
+    padding: 0 .5em;
 }
 
 .post-header {
@@ -736,6 +744,101 @@ p {
     justify-content: space-between;
 }
 
+
+.center-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-color);
+}
+
+.search-card {
+    display: none;
+}
+
+
+/* Search bar css */
+.smallbar.navbar {
+    position: fixed;
+    height: 100vh;
+    width: var(--reduced-navbar-width);
+    min-width: var(--reduced-navbar-width);
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: var(--font-size);
+}
+
+.smallbar.navbar > ul > li > a{
+    display: flex;
+    justify-content: center;
+    width: fit-content;
+}
+
+.smallbar.navbar > ul > li {
+    display: flex;
+    justify-content: center;
+    padding: 0;
+}
+
+.smallbar .navbar-text-opt {
+    display: none;
+}
+
+.smallbar .full-name-logo {
+    display: none;
+}
+
+.smallbar .icon-logo {
+    display: flex;
+    width: 100%;
+    margin: 1em 23px;
+}
+
+.smallbar + .search-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: absolute;
+    top: 0;
+    left: calc(var(--reduced-navbar-width) - 0em);
+    border-radius: 0 10px 10px 0;
+    z-index: 1000;
+    height: 100vh;
+    width: calc(40vw - var(--reduced-navbar-width));
+    background-color: var(--bg-color);
+    border-right: 1px solid var(--highlight-color);
+    border-left: 1px solid var(--highlight-color);
+}
+
+.smallbar #navbar-search {
+    border: 1px solid var(--text-color);
+}
+
+.search-card .card-title {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    padding: .7em 1em;
+}
+
+.search-card .search {
+    padding: .5em 1em;
+    margin: 1em 0;
+}
+
+.search-card .search-input {
+    border-radius: 10px;
+}
+
+/* End search bar css */
+
+
+
+
 @media only screen and (max-width: 1100px) {
     .navbar {
         position: fixed;
@@ -748,6 +851,18 @@ p {
         background-color: var(--bg-color);
         color: var(--text-color);
         font-size: var(--font-size);
+    }
+
+    .navbar > ul > li > a{
+        display: flex;
+        justify-content: center;
+        width: fit-content;
+    }
+
+    .navbar > ul > li {
+        display: flex;
+        justify-content: center;
+        padding: 0;
     }
 
     .navbar-text-opt {

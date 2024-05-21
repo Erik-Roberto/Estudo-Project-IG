@@ -6,7 +6,8 @@
             </div>
             <div class="overlay-close-button pointer-on-hover">&#x2715</div>
             <div class="search white-border-top">
-                <input type="text" name="search" placeholder="Search user">
+                <input type="hidden" value="{{ search_url }}" class="search-url">
+                <input type="text" name="search" placeholder="Search user" class="search-input">
             </div>
         </div>
         <div class="users">
@@ -28,6 +29,7 @@
                         </span>
                     </div>
                     <div class="relationship-buttons">
+                        <input type="hidden" class="post-url" value="{% if profile_user %} {% url 'users:profile' username=profile_user.username %} {% else %} {% url 'users:profile' username=user.username %} {% endif %}">
                         <input type="hidden" class="username" value="{{ user.username }}">
                         {% if profile_user == logged_user and page_title == 'Seguidores' %}
                         <div class="profile-button remove-follower pointer-on-hover">
@@ -48,7 +50,9 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <p>Vazio</p>
+            <div class="center-text">
+                <p>Vazio</p>
+            </div>
             {% endif %}
         </div>
     </div>

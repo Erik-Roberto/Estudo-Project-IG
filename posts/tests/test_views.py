@@ -1,13 +1,11 @@
 import json
 
-
 from django.test import TestCase
 from django.urls import reverse
 
-
-from posts.models import PostModel
+from posts.models import PostModel, CommentModel
 from users.models import CustomUser
-from comments.models import CommentModel
+
 from factories import factories as f
 
 

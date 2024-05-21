@@ -6,8 +6,8 @@ from django.urls import reverse
 
 
 from users.models import CustomUser
-from posts.models import PostModel
-from comments.models import CommentModel
+from posts.models import PostModel, CommentModel
+
 from factories.factories import create_test_user
 
 
@@ -181,7 +181,7 @@ class TestUserViews(TestCase):
         response = self.client.post(
             reverse('users:profile', kwargs={'username': user2.username}),
             data=json.dumps({
-                'username': user2.username,
+                'target': user2.username,
                 'action': 'follow-unfollow',
             }),
             content_type='application/json',
@@ -203,7 +203,7 @@ class TestUserViews(TestCase):
         response = self.client.post(
             reverse('users:profile', kwargs={'username': user2.username}),
             data=json.dumps({
-                'username': user2.username,
+                'target': user2.username,
                 'action': 'follow-unfollow',
             }),
             content_type='application/json',
@@ -225,7 +225,7 @@ class TestUserViews(TestCase):
             response = self.client.post(
                 reverse('users:profile', kwargs={'username': user2.username}),
                 data=json.dumps({
-                    'username': user2.username,
+                    'target': user2.username,
                 }),
                 content_type='application/json',
             )
@@ -386,7 +386,7 @@ class TestUserViews(TestCase):
         self.assertTrue(logged_in)
         response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'users/following-followers.html')
+        self.assertTemplateUsed(response, 'users/users_card.html')
 
 
     def test_following_view_raise_404_inexistent_user(self):
@@ -464,7 +464,7 @@ class TestUserViews(TestCase):
         self.assertTrue(logged_in)
         response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'users/following-followers.html')
+        self.assertTemplateUsed(response, 'users/users_card.html')
 
 
     def test_followers_view_raise_404_inexistent_user(self):

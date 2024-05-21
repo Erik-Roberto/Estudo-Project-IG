@@ -19,6 +19,7 @@
                         </div>
                         {% if logged_user.username != profile_user.username %}
                         <div class="profile-header-buttons">
+                            <input type="hidden" class="post-url" value="{{ request.get_full_path }}">
                             <input type="hidden" class="username" value="{{ profile_user.username }}">
                             {% if is_following %}
                                 <p class="profile-button follow-button unfollow-button">
@@ -66,7 +67,7 @@
                 {% if posts %}
                 <div class="post-grid-div">
                     {% for post in posts %}
-                    <a href="{% url 'posts:main-view' post_id=post.id %}" class="post-div">
+                    <a href="{% url 'posts:post' post_id=post.id %}" class="post-div">
                         <div>
                             <!-- TODO: Alt da imagem do post -->
                             <img src="{{ MEDIA_URL }}{{ post.img }}" alt="">

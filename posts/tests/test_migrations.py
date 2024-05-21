@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 
-from posts.models import PostModel
+from posts.models import PostModel,CommentModel
 from users.models import CustomUser
 from factories import factories as f
 

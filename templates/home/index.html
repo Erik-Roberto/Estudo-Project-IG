@@ -54,7 +54,7 @@
                         </div>
                         <div class="post-comments">
                             <div class="show-comments pointer-on-hover">
-                                <input type="hidden" value="{% url 'posts:main-view' post_id=post.id %}" class="post-id">
+                                <input type="hidden" value="{% url 'posts:post' post_id=post.id %}" class="post-url">
                                 {% if post|get_total_comments > 1 %}
                                 <p>Ver todos os {{ post|get_total_comments }} comentários</p>
                                 {% elif post|get_total_comments == 1 %}

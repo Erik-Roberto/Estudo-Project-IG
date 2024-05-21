@@ -29,8 +29,7 @@
                 </a>
             </li>
             <li>
-                <!-- TODO: Colocar link para view pesquisa -->
-                <a href=""> 
+                <a href="#" id="navbar-search"> 
                     <div class="icon">
                         <svg aria-label="Pesquisa" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24">
                             <title>Pesquisar</title>
@@ -39,6 +38,9 @@
                         <img src="" alt="">
                     </div>
                     <p class="navbar-text-opt">Pesquisar</p>
+                    <div>
+
+                    </div>
                 </a>
             </li>
             <li>
@@ -76,4 +78,50 @@
             </li>
         </ul>
     </div>
+    <div class="search-card">
+        <div class="relationship-card-header">
+            <div class="card-title">
+                <h2 class="title">Pesquisa</h2>
+            </div>
+            <div class="search">
+                <input type="hidden" value="{% url 'users:search' %}" class="search-url">
+                <input type="text" name="search" placeholder="Search user" class="search-input">
+            </div>
+        </div>
+        <div class="users white-border-top">
+            <ul class="users-list">
+                
+            </ul>
+        </div>
+    </div>
 </nav>
+
+<template id="users-template">
+    <li class="user-item">
+        <div class="user-info">
+            <div class="user-icon round-icon">
+                <img src="" alt="" width="50" height="50">
+            </div>
+            <span>
+                <a href="">
+                    <p></p>
+                </a>
+
+                <p class="max-text"></p>
+
+            </span>
+        </div>
+        <div class="relationship-buttons">
+            <input type="hidden" class="post-url" value="">
+            <input type="hidden" class="username" value="">
+
+            <div class="profile-button remove-follower pointer-on-hover">
+                Remover
+            </div>
+
+            <div class="profile-button follow-button pointer-on-hover unfollow-button">
+                Seguindo
+            </div>
+        </div>
+    </li>
+</template>

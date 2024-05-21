@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from posts.models import PostModel
+from posts.models import PostModel, CommentModel
 from factories import factories as f
 
 
