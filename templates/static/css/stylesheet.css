@@ -633,7 +633,7 @@ p {
     --main-card-height: 70vh;
     position: relative;
     min-width: var(--main-card-width);
-    width: fit-content;
+    width: var(--main-card-width);
     max-width: 80vw;
     height: var(--main-card-height);
     background-color: var(--bg-color-2);
@@ -642,6 +642,10 @@ p {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+}
+
+.users {
+    overflow: auto;
 }
 
 .users-list {
@@ -672,7 +676,8 @@ p {
 }
 
 .max-text {
-    width: 20em;
+    width: fit-content;
+    max-width: 50%;
     text-overflow: ellipsis;
     overflow: hidden;
     display: block;
