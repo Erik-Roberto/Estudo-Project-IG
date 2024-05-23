@@ -13,14 +13,12 @@ def like_dislike(obj: CommentModel | PostModel, user: CustomUser) -> bool:
     return True
 
 
-def create_new_comment(user: CustomUser, post: PostModel, data: dict) -> dict:
-    if 'text' not in data.keys():
-        raise ValueError("Missing 'text' tag in post request.")
+def create_new_comment(user: CustomUser, post: PostModel, text: str) -> dict:
     
     new_comment = CommentModel.objects.create(
         user = user,
         post = post,
-        text = data['text'],
+        text = text,
     )
     new_comment.save()
     # TODO: Melhorar esse loop - Talvez tenha maneira melhor de adicionar essas informações sem ter que
