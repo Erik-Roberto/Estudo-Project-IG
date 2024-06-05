@@ -1,6 +1,6 @@
 import json
 
-from django.http import Http404, JsonResponse, HttpResponseBadRequest
+from django.http import Http404, JsonResponse, HttpResponseBadRequest, HttpRequest, HttpResponse
 from django.urls import reverse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -13,7 +13,7 @@ from helpers.users import search_user, POST_LIKES, COMMENT_LIKES
 
 
 @login_required
-def post(request, post_id):
+def post(request: HttpRequest, post_id: int) -> JsonResponse | HttpResponse:
     post = get_object_or_404(PostModel, id=post_id)
     if not post.published:
         raise Http404('Post not found.')
@@ -35,7 +35,7 @@ def post(request, post_id):
 
 
 @login_required
-def post_likes(request, post_id):
+def post_likes(request: HttpRequest, post_id: int) -> JsonResponse | HttpResponse:
     post = get_object_or_404(PostModel, id=post_id)
     if not post.published:
         raise Http404('Post not found.')
@@ -60,7 +60,7 @@ def post_likes(request, post_id):
 
 
 @login_required
-def comment_likes(request, obj_id):
+def comment_likes(request: HttpRequest, obj_id: int) -> JsonResponse | HttpResponse:
     if request.method == 'POST':
         post = get_object_or_404(PostModel, id=obj_id)
         data = json.loads(request.body)
@@ -87,7 +87,7 @@ def comment_likes(request, obj_id):
 
 
 @login_required
-def post_search(request, obj_id):
+def post_search(request: HttpRequest, obj_id: int) -> JsonResponse:
     if request.method == 'GET':
         query = request.GET.get('q', '')
         response = {
@@ -104,11 +104,11 @@ def post_search(request, obj_id):
         }
         return JsonResponse(response) 
     else:
-        return HttpResponseBadRequest('Only GET requests are allowed.') # TODO: Testes
+        return HttpResponseBadRequest('Only GET requests are allowed.')
     
 
 @login_required
-def comment_search(request, obj_id):
+def comment_search(request: HttpRequest, obj_id: int) -> JsonResponse:
     if request.method == 'GET':
         query = request.GET.get('q', '')
         response = {
@@ -125,4 +125,4 @@ def comment_search(request, obj_id):
         }
         return JsonResponse(response) 
     else:
-        return HttpResponseBadRequest('Only GET requests are allowed.') # TODO: Testes
+        return HttpResponseBadRequest('Only GET requests are allowed.')

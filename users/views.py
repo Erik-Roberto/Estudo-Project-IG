@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse, HttpRequest, HttpResponse, HttpResponseRedirect
 
 from .forms import CustomUserCreationForm, LoginForm
 from .models import CustomUser
@@ -14,7 +14,7 @@ from posts.models import PostModel, CommentModel
 from helpers.users import follow_or_unfollow_user, remove_follower, get_total_following, get_total_followers, search_user, FOLLOWERS, FOLLOWING
 
 
-def sign_up(request):
+def sign_up(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     if request.user.is_authenticated:
         return redirect(reverse('users:profile', kwargs={'username': request.user.username}))
     if request.method == 'POST':
@@ -28,7 +28,7 @@ def sign_up(request):
     return render(request, 'users/register.html', {'form': form})
 
 
-def login_view(request):
+def login_view(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     if request.user.is_authenticated:
         return redirect(reverse('users:profile', kwargs={'username': request.user}))
     if request.method == 'POST':
@@ -50,13 +50,13 @@ def login_view(request):
 
 
 @login_required
-def logout_view(request):
+def logout_view(request: HttpRequest) -> HttpResponseRedirect:
     logout(request)
     return redirect('users:login')
 
 
 @login_required
-def profile(request, username):
+def profile(request: HttpRequest, username: str) -> HttpResponse | JsonResponse:
     page_user = get_object_or_404(CustomUser, username=username)
     logged_user = request.user
     if request.method == 'POST':
@@ -92,7 +92,7 @@ def profile(request, username):
     
 
 @login_required
-def following(request, username):
+def following(request: HttpRequest, username: str) -> HttpResponse:
     if request.method == 'GET': 
         page_user =  get_object_or_404(CustomUser, username=username)
         logged_user = get_object_or_404(CustomUser, username=request.user)
@@ -106,11 +106,10 @@ def following(request, username):
                             'search_url': reverse('users:following_search', kwargs={'username':username}),
                         })
     else:
-        return HttpResponseBadRequest('Only GET requests are allowed.') # TODO: Testes
-    
+        return HttpResponseBadRequest('Only GET requests are allowed.')
 
 @login_required
-def followers(request, username):
+def followers(request: HttpRequest, username: str) -> HttpResponse:
     if request.method == 'GET': 
         page_user =  get_object_or_404(CustomUser, username=username)
         logged_user = get_object_or_404(CustomUser, username=request.user)
@@ -125,12 +124,13 @@ def followers(request, username):
                             'search_url': reverse('users:followers_search', kwargs={'username':username}),
                         })
     else:
-        return HttpResponseBadRequest('Only GET requests are allowed.') # TODO: Testes
+        return HttpResponseBadRequest('Only GET requests are allowed.')
 
 @login_required
-def search(request): # TODO: Testes
+def search(request: HttpRequest) -> JsonResponse:
     if request.method == 'GET':
         query = request.GET.get('q', '')
+        t = search_user(substring=query, logged_user=request.user)
         return JsonResponse({
             'user_list': search_user(substring=query, logged_user=request.user),
             'profile_user': None,
@@ -139,11 +139,11 @@ def search(request): # TODO: Testes
             'show_remove': False,
         }) 
     else:
-        return HttpResponseBadRequest('Only GET requests are allowed.') # TODO: Testes
+        return HttpResponseBadRequest('Only GET requests are allowed.')
 
 
 @login_required
-def following_search(request, username):
+def following_search(request: HttpRequest, username: str) -> JsonResponse:
     if request.method == 'GET':
         query = request.GET.get('q', '')
         return JsonResponse({
@@ -154,11 +154,11 @@ def following_search(request, username):
             'show_remove': False,
         })
     else:
-        return HttpResponseBadRequest('Only GET requests are allowed.') # TODO: Testes
+        return HttpResponseBadRequest('Only GET requests are allowed.')
     
 
 @login_required
-def followers_search(request, username):
+def followers_search(request: HttpRequest, username: str) -> JsonResponse:
     if request.method == 'GET':
         query = request.GET.get('q', '')
         return JsonResponse({
@@ -169,5 +169,5 @@ def followers_search(request, username):
             'show_remove': (username == request.user.username),
         })
     else:
-        return HttpResponseBadRequest('Only GET requests are allowed.') # TODO: Testes
+        return HttpResponseBadRequest('Only GET requests are allowed.')
     

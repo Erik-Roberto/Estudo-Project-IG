@@ -585,6 +585,7 @@ function createSearchedUserCards(data, profileUser = null, showBio = false, show
     return userCard;
 }
 
+
 document.addEventListener('DOMContentLoaded', function() {
     postDescriptionButton();
     inputCommentButton();

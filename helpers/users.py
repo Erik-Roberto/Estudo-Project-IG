@@ -55,11 +55,10 @@ def search_user(substring: str, logged_user: CustomUser, search_in: str = ALL_US
     if search_in not in SEARCH_OPTIONS:
         raise ValueError('Invalid search_in value.')
 
-
     if search_in == ALL_USERS:
         user_list = CustomUser.objects.filter(username__contains=substring)
         if not substring: # Para substring = ''
-            return
+            return []
     elif search_in == FOLLOWERS and identification:
         user_list = CustomUser.objects.filter(following__username=identification, username__contains=substring)
     elif search_in == FOLLOWING and identification:
@@ -73,7 +72,6 @@ def search_user(substring: str, logged_user: CustomUser, search_in: str = ALL_US
         user_list = comment.likes.filter(username__contains=substring)
     else:
         raise ValueError('Invalid search in argument or missing obj_id.')
-    
 
     return  [{
         'username': u.username,

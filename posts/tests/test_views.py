@@ -10,13 +10,15 @@ from factories import factories as f
 from helpers.posts import get_total_likes, get_total_comments
 
 
-class TestPostViews(TestCase):
+class PostViewsBase(TestCase):
 
     def setUp(self):
         self.user = f.create_test_user()
         self.posts = [f.create_test_post(user=self.user, desc=f'Test Post #{i}') for i in range(3)]
         self.client.login(username=f.STD_TEST_USERNAME, password=f.STD_TEST_PASSWORD)
-        
+
+
+class PostViewTest(PostViewsBase):
 
     def test_post_view_gets_right_post(self):
         """
@@ -137,6 +139,8 @@ class TestPostViews(TestCase):
             )
 
 
+class PostLikesViewTest(PostViewsBase):
+
     def test_like_post_view_for_like(self):
         """
         Test liking post feature.
@@ -243,6 +247,8 @@ class TestPostViews(TestCase):
             response.context['search_url']
         )
 
+
+class CommentLikesViewTest(PostViewsBase):
 
     def test_comment_like_view_like_comment(self):
         """
@@ -397,6 +403,8 @@ class TestPostViews(TestCase):
         )
 
 
+class PostSearchViewTest(PostViewsBase):
+
     def test_post_search_view_blocked_for_unauthenticated_user(self):
         """
         Test if the post_search view redirects unauthenticated users to login page.
@@ -518,6 +526,8 @@ class TestPostViews(TestCase):
         self.assertFalse(response['show_remove'])
         self.assertEqual(self.user.username, response['profile_user'])
 
+
+class CommentSearchViewTest(PostViewsBase):
 
     def test_comment_search_view_blocked_for_unauthenticated_user(self):
         """

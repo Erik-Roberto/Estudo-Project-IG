@@ -1,9 +1,7 @@
 import json
 
-
 from django.test import TestCase
 from django.urls import reverse
-
 
 from users.models import CustomUser
 from posts.models import PostModel, CommentModel
@@ -11,8 +9,7 @@ from posts.models import PostModel, CommentModel
 from factories.factories import create_test_user
 
 
-class TestUserViews(TestCase):
-
+class UserViewsBase(TestCase):
     username = 'test_username'
     email = 'test_username@testemail.com'
     password='pass@123'
@@ -24,12 +21,16 @@ class TestUserViews(TestCase):
             password=self.password,
             email=self.email
             )
+        self.client.login(username=self.username, password=self.password)
 
+
+class SignUpViewTests(UserViewsBase):
 
     def test_sign_up_view_fail_invalid_data(self):
         """
         Test the sign up view with a invalid email
         """
+        logged_out = self.client.logout()
         data = {
             'username': 'test',
             'email': 'invalid_email'
@@ -42,6 +43,7 @@ class TestUserViews(TestCase):
         """
         Test the sign up view with a blank form
         """
+        logged_out = self.client.logout()
         response = self.client.post(reverse('users:sign_up'), {})
         self.assertFormError(response, 'form', 'email','This field is required.')
         self.assertFormError(response, 'form', 'username','This field is required.')
@@ -53,6 +55,7 @@ class TestUserViews(TestCase):
         """
         Test the sign up view with valid data
         """
+        logged_out = self.client.logout()
         data = {
             'username': 'user',
             'email': 'user@email.com',
@@ -67,6 +70,7 @@ class TestUserViews(TestCase):
         """
         Test the sign up view template
         """
+        logged_out = self.client.logout()
         response = self.client.get(reverse('users:sign_up'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/register.html')
@@ -76,16 +80,17 @@ class TestUserViews(TestCase):
         """
         Test if the sign up view is blocked for users loged
         """
-        logged_in = self.client.login(username=self.username, password=self.password)
         response = self.client.get(reverse('users:sign_up'), follow=True)
-        self.assertTrue(logged_in)
         self.assertRedirects(response, reverse('users:profile', kwargs={'username': self.user.username}))
 
+
+class LoginViewTests(UserViewsBase):
 
     def test_login_view_fail_blank_data(self):
         """
         Test the login view with a blank data
         """
+        logged_out = self.client.logout()
         response = self.client.post(reverse('users:login'), {})
         self.assertFormError(response, 'form', 'username','This field is required.')
         self.assertFormError(response, 'form', 'password','This field is required.')
@@ -95,6 +100,7 @@ class TestUserViews(TestCase):
         """
         Test the login view with valid data
         """
+        logged_out = self.client.logout()
         data = {
             'username': self.username,
             'password': self.password,
@@ -107,8 +113,8 @@ class TestUserViews(TestCase):
         """
         Test the login view template
         """
+        logged_out = self.client.logout()
         response = self.client.get(reverse('users:login'))
-        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/login.html')
 
 
@@ -116,16 +122,17 @@ class TestUserViews(TestCase):
         """
         Test if the login view is blocked for users loged
         """
-        logged_in = self.client.login(username=self.username, password=self.password)
         response = self.client.get(reverse('users:login'), follow=True)
-        self.assertTrue(logged_in)
         self.assertRedirects(response, reverse('users:profile', kwargs={'username': self.user.username}))
 
+
+class LogoutViewTests(UserViewsBase):
 
     def test_logout_view_blocked_for_unauthenticated_user(self):
         """
         Test if the logout view is protect of unauthenticated users
         """
+        logged_out = self.client.logout()
         response = self.client.get(reverse('users:logout'), follow=True)
         self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:logout')}')
 
@@ -134,16 +141,17 @@ class TestUserViews(TestCase):
         """
         Test if the logout view disconnect authenticated user
         """
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         response = self.client.get(reverse('users:logout'), follow=True)
         self.assertRedirects(response, reverse('users:login'))
 
+
+class ProfileViewTests(UserViewsBase):
 
     def test_profile_view_blocked_for_unauthenticated_user(self):
         """
         Test if the profile view is protect of unauthenticated users
         """
+        logged_out = self.client.logout()
         response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}), follow=True)
         self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:profile', kwargs={'username':self.user.username})}')
 
@@ -152,8 +160,6 @@ class TestUserViews(TestCase):
         """
         Test the profile view template
         """
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/profile.html')
@@ -164,8 +170,6 @@ class TestUserViews(TestCase):
         Test profile view raise a HTTP404 for a invalid user id
         """
         invalid_username = 'ABCD100'
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         response = self.client.get(reverse('users:profile', kwargs={'username':invalid_username}))
         self.assertEqual(response.status_code, 404)
 
@@ -176,8 +180,6 @@ class TestUserViews(TestCase):
         """
         user2 = create_test_user()
         self.assertFalse(self.user.is_following(user2.id))
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         response = self.client.post(
             reverse('users:profile', kwargs={'username': user2.username}),
             data=json.dumps({
@@ -196,8 +198,6 @@ class TestUserViews(TestCase):
         """
         user2 = create_test_user()
         self.assertFalse(self.user.is_following(user2.id))
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         self.user.following.add(user2)
         self.assertTrue(self.user.is_following(user2.id))
         response = self.client.post(
@@ -219,8 +219,6 @@ class TestUserViews(TestCase):
         """
         user2 = create_test_user()
         self.assertFalse(self.user.is_following(user2.id))
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         with self.assertRaises(ValueError):        
             response = self.client.post(
                 reverse('users:profile', kwargs={'username': user2.username}),
@@ -236,8 +234,6 @@ class TestUserViews(TestCase):
         Test if the profile view raises 404 code for a iexistent user id
         """
         invalid_username = 'ABCD100'
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         response = self.client.post(
                 reverse('users:profile', kwargs={'username': invalid_username}),
                 data=json.dumps({
@@ -254,8 +250,6 @@ class TestUserViews(TestCase):
         Test if the profile view query passes all posts to template
         """
         qtd_posts = 5
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         # Creating dummy posts
         for i in range(qtd_posts):
             PostModel.objects.create(user=self.user, description=f'Post#{i}')
@@ -269,15 +263,9 @@ class TestUserViews(TestCase):
         shown in profile view infos
         """
         qtd_users = 5
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         # Creating dummy users
-        for i in range(qtd_users):
-            user = create_test_user(
-                username=f'testuser{i}',
-                password=f'testuser{i}_password',
-                email=f'testuser{i}@email.com',
-            )
+        for _ in range(qtd_users):
+            user = create_test_user()
             self.user.following.add(user)
         response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
         self.assertEqual(qtd_users, response.context['following_qty'])
@@ -288,15 +276,9 @@ class TestUserViews(TestCase):
         Test if the correct amount of followers are shown in profile view infos
         """
         qtd_users = 7
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         # Creating dummy users
-        for i in range(qtd_users):
-            user = create_test_user(
-                username=f'testuser{i}',
-                password=f'testuser{i}_password',
-                email=f'testuser{i}@email.com',
-            )
+        for _ in range(qtd_users):
+            user = create_test_user()
             user.following.add(self.user)
         response = self.client.get(reverse('users:profile', kwargs={'username':self.user.username}))
         self.assertEqual(qtd_users, response.context['followers_qty'])
@@ -308,16 +290,8 @@ class TestUserViews(TestCase):
         """
         qty_users = 4
         qty_posts = 2
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         # Creating dummy users
-        users = []
-        for i in range(qty_users):
-            users.append(create_test_user(
-                username=f'testuser{i}',
-                password=f'testuser{i}_password',
-                email=f'testuser{i}@email.com',
-            ))
+        users = [create_test_user() for _ in range(qty_users)]
         # Creating dummy posts
         for i in range(qty_posts):
             post = PostModel.objects.create(
@@ -339,16 +313,8 @@ class TestUserViews(TestCase):
         """
         qty_users = 3
         qty_posts = 2
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         # Creating dummy users
-        users = []
-        for i in range(qty_users):
-            users.append(create_test_user(
-                username=f'testuser{i}',
-                password=f'testuser{i}_password',
-                email=f'testuser{i}@email.com',
-            ))
+        users = [create_test_user() for _ in range(qty_users)]
         # Creating dummy posts and comments
         posts = []
         for i in range(qty_posts):
@@ -370,10 +336,13 @@ class TestUserViews(TestCase):
             self.assertEqual(qty_users, comments)
 
 
+class FollowingViewTests(UserViewsBase):
+
     def test_following_view_blocked_for_unauthenticated_user(self):
         """
         Test if the following view is protect of unauthenticated users
         """
+        logged_out = self.client.logout()
         response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}), follow=True)
         self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:following', kwargs={'username':self.user.username})}')
     
@@ -382,8 +351,6 @@ class TestUserViews(TestCase):
         """
         Test the following view template
         """
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/users_card.html')
@@ -394,8 +361,6 @@ class TestUserViews(TestCase):
         Test following view raise a HTTP404 for a invalid user id
         """
         invalid_username = 'ABCD100'
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         response = self.client.get(reverse('users:following', kwargs={'username':invalid_username}))
         self.assertEqual(response.status_code, 404)
 
@@ -405,15 +370,9 @@ class TestUserViews(TestCase):
         Test following view passes all followers to the template
         """
         qtd_users = 5
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         # Creating dummy users
-        for i in range(qtd_users):
-            user = create_test_user(
-                username=f'testuser{i}',
-                email=f'emailuser{i}@test.com',
-                password=f'passworduser{i}',
-                )
+        for _ in range(qtd_users):
+            user = create_test_user()
             self.user.following.add(user)
         response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
         self.assertEqual(qtd_users, len(response.context['user_list']))
@@ -425,20 +384,13 @@ class TestUserViews(TestCase):
         are being followed by logged user.
         """
         qtd_users = 5
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
-        users = [
-            create_test_user(
-                username=f'testuser{i}',
-                email=f'testuser{i}@test.com',
-                password=f'passworduser{i}',
-                )
-            for i in range(qtd_users)
-            ]
         following_count = 0
-        for user in users:
+        users = []
+        for _ in range(qtd_users):
+            user = create_test_user()
             self.user.following.add(user)
             following_count += 1
+            users.append(user)
         response = self.client.get(reverse('users:following', kwargs={'username':self.user.username}))
         context_count = len([user for user, is_following in response.context['user_list'] if is_following])
         self.assertEqual(following_count, context_count)
@@ -448,10 +400,59 @@ class TestUserViews(TestCase):
         self.assertEqual(following_count-1, context_count)
         
 
+    def test_following_view_returns_badrequest_if_post_request(self):
+        """
+        Test if the following view returns a HttpResponseBadRequest if a POST request is made.
+        """
+        response = self.client.post(reverse('users:following', kwargs={'username':self.user.username}))
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_following_view_returns_correct_profile_user(self):
+        """
+        Test if the 'profile_user' returned by the following_view matches the user expected.
+        """
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:following', kwargs={'username': test_user.username}))
+        self.assertEqual(response.context['profile_user'].username, test_user.username)
+
+
+    def test_following_view_returns_correct_logged_user(self):
+        """
+        Test if the 'logged_user' returned by the following_view matches the user expected.
+        """
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:following', kwargs={'username': test_user.username}))
+        self.assertEqual(response.context['logged_user'].username, self.user.username)
+
+
+    def test_following_view_returns_correct_page_title(self):
+        """
+        Test if the 'page_title' returned by the following view is 'Seguindo'.
+        """
+        response = self.client.get(reverse('users:following', kwargs={'username': self.user.username}))
+        self.assertEqual(response.context['page_title'], 'Seguindo')
+
+
+    def test_following_view_returns_correct_search_url(self):
+        """
+        Test if the 'search_url' returned by the following view is correct.
+        """
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:following', kwargs={'username': test_user.username}))
+        self.assertEqual(
+            response.context['search_url'],
+            reverse('users:following_search', kwargs={'username':test_user.username})
+            )
+
+
+class FollowersViewTests(UserViewsBase):
+
     def test_followers_view_blocked_for_unauthenticated_user(self):
         """
-        Test if the followers view is protect of unauthenticated users
+        Test if the followers view is protect of unauthenticated users.
         """
+        logged_out = self.client.logout()
         response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}), follow=True)
         self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:followers', kwargs={'username':self.user.username})}')
 
@@ -460,8 +461,6 @@ class TestUserViews(TestCase):
         """
         Test the followers view template
         """
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'users/users_card.html')
@@ -472,8 +471,6 @@ class TestUserViews(TestCase):
         Test followers view raise a HTTP404 for a invalid user id
         """
         invalid_username = 'ABCD100'
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         response = self.client.get(reverse('users:followers', kwargs={'username':invalid_username}))
         self.assertEqual(response.status_code, 404)
 
@@ -483,15 +480,9 @@ class TestUserViews(TestCase):
         Test followers view passes all followers to the template
         """
         qtd_users = 5
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
         # Creating dummy users
-        for i in range(qtd_users):
-            user = create_test_user(
-                username=f'testuser{i}',
-                email=f'emailuser{i}@test.com',
-                password=f'passworduser{i}',
-                )
+        for _ in range(qtd_users):
+            user = create_test_user()
             user.following.add(self.user)
         response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}))
         self.assertEqual(qtd_users, len(response.context['user_list']))
@@ -502,21 +493,15 @@ class TestUserViews(TestCase):
         Test if the list of all users of visited profile lists correctly wich user
         are being followed by logged user.
         """
-        logged_in = self.client.login(username=self.username, password=self.password)
-        self.assertTrue(logged_in)
-        users = [
-            create_test_user(
-                username=f'testuser{i}',
-                email=f'testuser{i}@test.com',
-                password=f'passworduser{i}',
-                )
-            for i in range(5)
-            ]
+        qty_test_user = 5
         following_count = 0
-        for user in users:
+        users = []
+        for _ in range(qty_test_user):
+            user = create_test_user()
             user.following.add(self.user)
             self.user.following.add(user)
             following_count += 1
+            users.append(user)
         response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}))
         context_count = len([user for user, is_following in response.context['user_list'] if is_following])
         self.assertEqual(following_count, context_count)
@@ -524,3 +509,291 @@ class TestUserViews(TestCase):
         response = self.client.get(reverse('users:followers', kwargs={'username':self.user.username}))
         context_count = len([user for user, is_following in response.context['user_list'] if is_following])
         self.assertEqual(following_count-1, context_count)
+
+
+    def test_followers_view_returns_badrequest_if_post_request(self):
+        """
+        Test if the followers view returns a HttpResponseBadRequest if a POST request is made.
+        """
+        response = self.client.post(reverse('users:followers', kwargs={'username': self.user.username}))
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_followers_view_returns_correct_profile_user(self):
+        """
+        Test if the 'profile_user' returned by the followers_view matches the user expected.
+        """
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:followers', kwargs={'username': test_user.username}))
+        self.assertEqual(response.context['profile_user'].username, test_user.username)
+
+
+    def test_followers_view_returns_correct_logged_user(self):
+        """
+        Test if the 'logged_user' returned by the followers_view matches the user expected.
+        """
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:followers', kwargs={'username': test_user.username}))
+        self.assertEqual(response.context['logged_user'].username, self.user.username)
+
+
+    def test_followers_view_returns_correct_page_title(self):
+        """
+        Test if the 'page_title' returned by the followers view is 'Seguidores'.
+        """
+        response = self.client.get(reverse('users:followers', kwargs={'username': self.user.username}))
+        self.assertEqual(response.context['page_title'], 'Seguidores')
+
+
+    def test_followers_view_returns_correct_search_url(self):
+        """
+        Test if the 'search_url' returned by the followers view is correct.
+        """
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:followers', kwargs={'username': test_user.username}))
+        self.assertEqual(
+            response.context['search_url'],
+            reverse('users:followers_search', kwargs={'username':test_user.username})
+            )
+
+
+class SearchViewTests(UserViewsBase):
+    def test_search_view_is_blocked_for_unauthenticated_users(self):
+        """
+        Test if the search view is blocked for unauthenticated users.
+        """
+        loggout = self.client.logout()
+        response = self.client.get(reverse('users:search'), follow=True)
+        self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:search')}')
+
+
+    def test_search_view_returns_badrequest_for_post_request(self):
+        """
+        Test if the search view returns a HttpResponseBadRequest response if a POST request is made    
+        """
+        response = self.client.post(reverse('users:search'))
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_search_view_returns_correct_info(self):
+        """
+        Test if the search view returns the following parameters correctly:
+        profile_user, show_bio, show_relationship and show_remove.
+        """
+        response = self.client.get(reverse('users:search')).json()
+        self.assertIsNone(response['profile_user'])
+        self.assertFalse(response['show_bio'])
+        self.assertFalse(response['show_relationship'])
+        self.assertFalse(response['show_remove'])
+
+
+    def test_search_view_returns_empty_list_if_no_user_is_found(self):
+        """
+        Test if the search view returns a empty list if a query that matchs no user is received.
+        """
+        nonexistent_user = 'nonexistent_user'
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:search'), {'q': nonexistent_user}).json()
+        self.assertEqual(len(response['user_list']), 0)
+
+
+    def test_search_view_returns_empty_list_if_empty_query(self):
+        """
+        Test if the search view returns a empty list if a empty query is received.
+        """
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:search'), {'q': ''}).json()
+        self.assertEqual(len(response['user_list']), 0)
+
+
+    def test_search_view_returns_correct_user_list_for_query(self):
+        """
+        Test if the search view returns the correct list of users if a valid query is received.
+        """
+        qty_users = 5
+        test_users = [create_test_user() for _ in range(qty_users)]
+        # partial match
+        query = 'test'
+        response = self.client.get(reverse('users:search'), {'q': query}).json()
+        response = [u['username'] for u in response['user_list']]
+        for user in test_users:
+            self.assertIn(user.username, response)
+
+
+class FollowersSearchViewTests(UserViewsBase):
+    
+    def test_followers_search_view_is_blocked_for_unauthenticated_users(self):
+        """
+        Test if the followers_search view is blocked for unauthenticated users.
+        """
+        loggout = self.client.logout()
+        response = self.client.get(reverse('users:followers_search', kwargs={'username': self.user.username}), follow=True)
+        self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:followers_search', kwargs={'username': self.user.username})}')
+
+
+    def test_followers_search_view_returns_badrequest_for_post_request(self):
+        """
+        Test if the followers_search view returns a HttpResponseBadRequest response if a POST request is made    
+        """
+        test_user = create_test_user()
+        response = self.client.post(reverse('users:followers_search', kwargs={'username': test_user.username}))
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_followers_search_view_returns_correct_info(self):
+        """
+        Test if the followers_search view returns the following parameters correctly:
+        profile_user, show_bio, show_relationship and show_remove.
+        """
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:followers_search', kwargs={'username': test_user.username})).json()
+        self.assertEqual(response['profile_user'], test_user.username)
+        self.assertTrue(response['show_bio'])
+        self.assertTrue(response['show_relationship'])
+        self.assertFalse(response['show_remove'])
+
+
+    def test_followers_search_view_returns_empty_list_if_no_user_is_found(self):
+        """
+        Test if the followers_search view returns a empty list if a query that matchs no user is received.
+        """
+        qty_users = 5
+        users = []
+        for _ in range(qty_users):
+            user = create_test_user()
+            user.following.add(self.user)
+            users.append(user)
+        test_user = create_test_user()
+        response = self.client.get(
+            reverse('users:followers_search', kwargs={'username': self.user.username}),
+            {'q': test_user.username}
+            ).json()
+        self.assertEqual(len(response['user_list']), 0)
+
+
+    def test_followers_search_view_returns_all_users_if_empty_query(self):
+        """
+        Test if the followers_search view returns all followers if a empty query is received.
+        """
+        qty_users = 5
+        users = []
+        for _ in range(qty_users):
+            user = create_test_user()
+            user.following.add(self.user)
+            users.append(user)
+        response = self.client.get(
+            reverse('users:followers_search', kwargs={'username': self.user.username}),
+            {'q': ''}
+            ).json()
+        self.assertEqual(len(response['user_list']), qty_users)
+
+
+    def test_followers_search_view_returns_correct_user_list_for_query(self):
+        """
+        Test if the followers_search view returns the correct list of users if a valid query is received.
+        """
+        qty_users = 5
+        query = 'test'
+        users = []
+        for _ in range(qty_users):
+            user = create_test_user()
+            user.following.add(self.user)
+            users.append(user)
+        response = self.client.get(
+            reverse('users:followers_search', kwargs={'username': self.user.username}),
+            {'q': query}
+            ).json()
+        response = [u['username'] for u in response['user_list']]
+        for user in users:
+            self.assertIn(user.username, response)
+
+
+class FollowingSearchViewTests(UserViewsBase):
+
+    def test_following_search_view_is_blocked_for_unauthenticated_users(self):
+        """
+        Test if the search view is blocked for unauthenticated users.
+        """
+        loggout = self.client.logout()
+        response = self.client.get(reverse('users:following_search', kwargs={'username': self.user.username}), follow=True)
+        self.assertRedirects(response, reverse('users:login') + f'?next={reverse('users:following_search', kwargs={'username': self.user.username})}')
+
+
+    def test_following_search_view_returns_badrequest_for_post_request(self):
+        """
+        Test if the following_search view returns a HttpResponseBadRequest response if a POST request is made    
+        """
+        test_user = create_test_user()
+        response = self.client.post(reverse('users:following_search', kwargs={'username': test_user.username}))
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_following_search_view_returns_correct_info(self):
+        """
+        Test if the following_search view returns the following parameters correctly:
+        profile_user, show_bio, show_relationship and show_remove.
+        """
+        test_user = create_test_user()
+        response = self.client.get(reverse('users:followers_search', kwargs={'username': test_user.username})).json()
+        self.assertEqual(response['profile_user'], test_user.username)
+        self.assertTrue(response['show_bio'])
+        self.assertTrue(response['show_relationship'])
+        self.assertFalse(response['show_remove'])
+        
+        response = self.client.get(reverse('users:followers_search', kwargs={'username': self.user.username})).json()
+        self.assertTrue(response['show_remove'])
+
+
+    def test_following_search_view_returns_empty_list_if_no_user_is_found(self):
+        """
+        Test if the following_search view returns a empty list if a query that matchs no user is received.
+        """
+        qty_users = 5
+        users = []
+        for _ in range(qty_users):
+            user = create_test_user()
+            user.following.add(self.user)
+            users.append(user)
+        test_user = create_test_user()
+        response = self.client.get(
+            reverse('users:following_search', kwargs={'username': self.user.username}),
+            {'q': test_user.username}
+            ).json()
+        self.assertEqual(len(response['user_list']), 0)
+
+
+    def test_following_search_view_returns_all_users_if_empty_query(self):
+        """
+        Test if the following_search view returns a all following users if a empty query is received.
+        """
+        qty_users = 5
+        users = []
+        for _ in range(qty_users):
+            user = create_test_user()
+            self.user.following.add(user)
+            users.append(user)
+        response = self.client.get(
+            reverse('users:following_search', kwargs={'username': self.user.username}),
+            {'q': ''}
+            ).json()
+        self.assertEqual(len(response['user_list']), qty_users)
+
+
+    def test_following_search_view_returns_correct_user_list_for_query(self):
+        """
+        Test if the following_search view returns the correct list of users if a valid query is received.
+        """
+        qty_users = 5
+        query = 'test'
+        users = []
+        for _ in range(qty_users):
+            user = create_test_user()
+            self.user.following.add(user)
+            users.append(user)
+        response = self.client.get(
+            reverse('users:following_search', kwargs={'username': self.user.username}),
+            {'q': query}
+            ).json()
+        response = [u['username'] for u in response['user_list']]
+        for user in users:
+            self.assertIn(user.username, response)
